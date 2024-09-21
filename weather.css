@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+:root {
+    --bg-color: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --highlight-color: #2c2c2c;
+    --accent-color: #bb86fc;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
@@ -8,11 +16,13 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     transition: background-color 0.5s ease;
 }
 
 .container {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--container-bg);
     padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -24,13 +34,14 @@ body {
 h1 {
     margin-bottom: 1rem;
     font-weight: 700;
+    color: var(--accent-color);
 }
 
 #current-weather {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 #temperature {
@@ -49,6 +60,24 @@ h1 {
     margin-left: 1rem;
 }
 
+#current-details {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detail-label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--accent-color);
+}
+
 #forecast {
     display: flex;
     justify-content: space-between;
@@ -60,9 +89,10 @@ h1 {
     flex-basis: calc(20% - 1rem);
     margin: 0.5rem;
     padding: 1rem;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: var(--highlight-color);
     border-radius: 8px;
     transition: transform 0.2s ease;
+    cursor: pointer;
 }
 
 .forecast-item:hover {
@@ -72,6 +102,7 @@ h1 {
 .forecast-item .date {
     font-weight: 600;
     margin-bottom: 0.5rem;
+    color: var(--accent-color);
 }
 
 .forecast-item .icon {
@@ -98,7 +129,7 @@ h1 {
     position: absolute;
     width: 2px;
     height: 15px;
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.3);
     animation: fall linear infinite;
 }
 
@@ -109,6 +140,44 @@ h1 {
     100% {
         transform: translateY(100vh);
     }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: var(--container-bg);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid var(--highlight-color);
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    color: var(--text-color);
+}
+
+.close {
+    color: var(--accent-color);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--text-color);
+    text-decoration: none;
+    cursor: pointer;
 }
 
 @media (max-width: 600px) {

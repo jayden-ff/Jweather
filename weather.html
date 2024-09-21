@@ -15,7 +15,28 @@
             <div id="description"></div>
             <div id="icon"></div>
         </div>
+        <div id="current-details">
+            <div class="detail-item">
+                <span class="detail-label">Feels like:</span>
+                <span id="feels-like"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Humidity:</span>
+                <span id="humidity"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Wind speed:</span>
+                <span id="wind-speed"></span>
+            </div>
+        </div>
         <div id="forecast"></div>
+    </div>
+    <div id="day-details" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-date"></h2>
+            <div id="modal-details"></div>
+        </div>
     </div>
     <script src="weather.js"></script>
 </body>

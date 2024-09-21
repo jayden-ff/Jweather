@@ -4,54 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weather Forecast - Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --highlight-color: #2c2c2c;
+            --accent-color: #bb86fc;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
+
         .container {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: var(--container-bg);
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+
         h1 {
             text-align: center;
-            color: #333;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
         }
+
+        .search-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         input {
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             font-size: 1rem;
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 4px;
+            background-color: var(--highlight-color);
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
         }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
         #suggestions {
             list-style-type: none;
             padding: 0;
             margin-top: 0.5rem;
+            width: 100%;
         }
+
         #suggestions li {
             cursor: pointer;
-            padding: 0.5rem;
-            background-color: #f0f0f0;
+            padding: 0.75rem;
+            background-color: var(--highlight-color);
             margin-bottom: 2px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
         }
+
         #suggestions li:hover {
-            background-color: #e0e0e0;
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInSuggestion {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .background-animation span {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                transform: translateY(-100px) translateX(100px);
+            }
+            100% {
+                transform: translateY(0) translateX(0);
+            }
         }
     </style>
 </head>
 <body>
+    <div class="background-animation" id="backgroundAnimation"></div>
     <div class="container">
         <h1>Weather Forecast</h1>
-        <input type="text" id="location" placeholder="Enter a location">
-        <ul id="suggestions"></ul>
+        <div class="search-container">
+            <input type="text" id="location" placeholder="Enter a location">
+            <ul id="suggestions"></ul>
+        </div>
     </div>
     <script>
         const input = document.getElementById('location');
@@ -69,9 +169,11 @@
 
             suggestionsList.innerHTML = '';
             if (data.results) {
-                data.results.forEach(result => {
+                data.results.forEach((result, index) => {
                     const li = document.createElement('li');
                     li.textContent = `${result.name}, ${result.country}`;
+                    li.style.animationDelay = `${index * 0.1}s`;
+                    li.style.animation = 'fadeInSuggestion 0.3s ease-out forwards';
                     li.addEventListener('click', () => {
                         window.location.href = `weather.html?lat=${result.latitude}&lon=${result.longitude}&name=${encodeURIComponent(result.name)}`;
                     });
@@ -79,6 +181,18 @@
                 });
             }
         });
+
+        // Background animation
+        const backgroundAnimation = document.getElementById('backgroundAnimation');
+        const numberOfParticles = 50;
+
+        for (let i = 0; i < numberOfParticles; i++) {
+            const span = document.createElement('span');
+            span.style.left = `${Math.random() * 100}%`;
+            span.style.top = `${Math.random() * 100}%`;
+            span.style.animationDelay = `${Math.random() * 15}s`;
+            backgroundAnimation.appendChild(span);
+        }
     </script>
 </body>
 </html>

@@ -6,7 +6,7 @@ const locationName = params.get('name');
 document.getElementById('location').textContent = decodeURIComponent(locationName);
 
 async function getWeatherData() {
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&current_weather=true&timezone=auto`);
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m&timezone=auto`);
     const data = await response.json();
     return data;
 }
@@ -46,26 +46,33 @@ function getWeatherIcon(weatherCode) {
 }
 
 function setTheme(weatherCode) {
-    const body = document.body;
-    const container = document.querySelector('.container');
+    const root = document.documentElement;
 
     if (weatherCode <= 3) {
         // Sunny
-        body.style.backgroundColor = '#87CEEB';
-        container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        root.style.setProperty('--bg-color', '#121212');
+        root.style.setProperty('--container-bg', '#1e1e1e');
+        root.style.setProperty('--highlight-color', '#2c2c2c');
+        root.style.setProperty('--accent-color', '#ffd700');
     } else if (weatherCode >= 51 && weatherCode <= 67) {
         // Rainy
-        body.style.backgroundColor = '#4682B4';
-        container.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        root.style.setProperty('--bg-color', '#1a1a1a');
+        root.style.setProperty('--container-bg', '#262626');
+        root.style.setProperty('--highlight-color', '#333333');
+        root.style.setProperty('--accent-color', '#4fc3f7');
         addRaindrops();
     } else if (weatherCode >= 71 && weatherCode <= 77) {
         // Snowy
-        body.style.backgroundColor = '#B0E0E6';
-        container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        root.style.setProperty('--bg-color', '#121212');
+        root.style.setProperty('--container-bg', '#1e1e1e');
+        root.style.setProperty('--highlight-color', '#2c2c2c');
+        root.style.setProperty('--accent-color', '#e0e0e0');
     } else {
         // Default
-        body.style.backgroundColor = '#F0F8FF';
-        container.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+        root.style.setProperty('--bg-color', '#121212');
+        root.style.setProperty('--container-bg', '#1e1e1e');
+        root.style.setProperty('--highlight-color', '#2c2c2c');
+        root.style.setProperty('--accent-color', '#bb86fc');
     }
 }
 
@@ -89,10 +96,16 @@ async function displayWeather() {
         const data = await getWeatherData();
         const currentWeather = data.current_weather;
         const dailyForecast = data.daily;
+        const hourlyForecast = data.hourly;
 
         document.getElementById('temperature').textContent = `${currentWeather.temperature}°C`;
         document.getElementById('description').textContent = getWeatherDescription(currentWeather.weathercode);
         document.getElementById('icon').textContent = getWeatherIcon(currentWeather.weathercode);
+
+        // Display additional current weather details
+        document.getElementById('feels-like').textContent = `${currentWeather.temperature}°C`;
+        document.getElementById('humidity').textContent = `${hourlyForecast.relativehumidity_2m[0]}%`;
+        document.getElementById('wind-speed').textContent = `${currentWeather.windspeed} km/h`;
 
         setTheme(currentWeather.weathercode);
 
@@ -113,12 +126,32 @@ async function displayWeather() {
                 <div class="icon">${icon}</div>
                 <div class="temp">${maxTemp}°C / ${minTemp}°C</div>
             `;
+            forecastItem.addEventListener('click', () => showDayDetails(i, dailyForecast, date));
             forecastContainer.appendChild(forecastItem);
         }
     } catch (error) {
         console.error('Error fetching weather data:', error);
         document.getElementById('current-weather').innerHTML = '<p>Error fetching weather data. Please try again later.</p>';
     }
+}
+
+function showDayDetails(index, forecast, date) {
+    const modal = document.getElementById('day-details');
+    const modalDate = document.getElementById('modal-date');
+    const modalDetails = document.getElementById('modal-details');
+
+    modalDate.textContent = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const details = `
+        <p><strong>Max Temperature:</strong> ${forecast.temperature_2m_max[index]}°C</p>
+        <p><strong>Min Temperature:</strong> ${forecast.temperature_2m_min[index]}°C</p>
+        <p><strong>Precipitation:</strong> ${forecast.precipitation_sum[index]} mm</p>
+        <p><strong>Max Wind Speed:</strong> ${forecast.windspeed_10m_max[index]} km/h</p>
+        <p><strong>Weather:</strong> ${getWeatherDescription(forecast.weathercode[index])}</p>
+    `;
+
+    modalDetails.innerHTML = details;
+    modal.style.display = 'block';
 }
 
 function getWeatherDescription(weatherCode) {
@@ -157,3 +190,11 @@ function getWeatherDescription(weatherCode) {
 
 // Call displayWeather when the page loads
 window.addEventListener('load', displayWeather);
+
+// Close modal when clicking on the close button or outside the modal
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('day-details');
+    if (event.target === modal || event.target.className === 'close') {
+        modal.style.display = 'none';
+    }
+});
