@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    transition: background-color 0.5s ease;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+}
+
+h1 {
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+#current-weather {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+#temperature {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-right: 1rem;
+}
+
+#description {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#icon {
+    font-size: 4rem;
+    margin-left: 1rem;
+}
+
+#forecast {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.forecast-item {
+    text-align: center;
+    flex-basis: calc(20% - 1rem);
+    margin: 0.5rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.forecast-item:hover {
+    transform: scale(1.05);
+}
+
+.forecast-item .date {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.forecast-item .icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.forecast-item .temp {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.raindrop {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background-color: rgba(255, 255, 255, 0.5);
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100vh);
+    }
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+@media (max-width: 600px) {
+    .forecast-item {
+        flex-basis: calc(33.33% - 1rem);
+    }
+}
+
+@media (max-width: 400px) {
+    .forecast-item {
+        flex-basis: calc(50% - 1rem);
+    }
+}

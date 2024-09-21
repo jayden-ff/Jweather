@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast - Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #suggestions {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 0.5rem;
+        }
+        #suggestions li {
+            cursor: pointer;
+            padding: 0.5rem;
+            background-color: #f0f0f0;
+            margin-bottom: 2px;
+        }
+        #suggestions li:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Forecast</h1>
+        <input type="text" id="location" placeholder="Enter a location">
+        <ul id="suggestions"></ul>
+    </div>
+    <script>
+        const input = document.getElementById('location');
+        const suggestionsList = document.getElementById('suggestions');
+
+        input.addEventListener('input', async () => {
+            const query = input.value.trim();
+            if (query.length < 3) {
+                suggestionsList.innerHTML = '';
+                return;
+            }
+
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
+            const data = await response.json();
+
+            suggestionsList.innerHTML = '';
+            if (data.results) {
+                data.results.forEach(result => {
+                    const li = document.createElement('li');
+                    li.textContent = `${result.name}, ${result.country}`;
+                    li.addEventListener('click', () => {
+                        window.location.href = `weather.html?lat=${result.latitude}&lon=${result.longitude}&name=${encodeURIComponent(result.name)}`;
+                    });
+                    suggestionsList.appendChild(li);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
