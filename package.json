@@ -1,0 +1,17 @@
+{
+  "name": "jweather",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A quiet, static weather journal. No runtime dependencies or build step.",
+  "scripts": {
+    "dev": "node tests/server.mjs",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

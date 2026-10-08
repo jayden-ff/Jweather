@@ -1,44 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <link rel="icon" type="png" href="JWeather.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JWeather Forecast</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f0e9">
+    <meta name="description" content="Dein Wetter im Überblick: aktuelle Bedingungen, die nächsten Stunden und eine Vorschau auf fünf Tage.">
+    <title>Dein Wetter — Jweather</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="weather.css">
+    <script src="weather.js" defer></script>
 </head>
-<body>
-    <div class="container">
-        <h1 id="location"></h1>
-        <div id="current-weather">
-            <div id="temperature"></div>
-            <div id="description"></div>
-            <div id="icon"></div>
-        </div>
-        <div id="current-details">
-            <div class="detail-item">
-                <span class="detail-label">Feels like:</span>
-                <span id="feels-like"></span>
+<body data-page="weather">
+    <a class="skip-link" href="#main">Zum Inhalt</a>
+    <div class="site-shell">
+        <header class="site-header reveal">
+            <a class="wordmark" href="index.html" aria-label="Jweather Startseite"><svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6.1 6.1l2.8 2.8m14.2 14.2 2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></svg>jweather<span class="wordmark-dot">.</span></a>
+            <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Anderer Ort</a>
+            <div class="unit-switch" role="group" aria-label="Temperatureinheit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
+        </header>
+        <main id="main" class="weather-main" aria-busy="true">
+            <section class="load-state" id="load-state" role="status" aria-live="polite">
+                <div class="loading-orbit" id="loading-orbit" aria-hidden="true"></div>
+                <p class="eyebrow" id="load-label">Ein Blick nach draußen</p>
+                <h1 id="load-title">Das Wetter kommt.</h1>
+                <p id="load-message">Wir holen die aktuelle Vorhersage für deinen Ort.</p>
+                <div class="load-actions" id="load-actions" hidden><button class="solid-button" id="retry-weather" type="button">Erneut versuchen <span aria-hidden="true">↗</span></button><a class="text-link" href="index.html">Anderen Ort suchen</a></div>
+            </section>
+            <div id="weather-content" hidden>
+                <div class="weather-heading reveal">
+                    <div><p class="eyebrow" id="location-region"></p><h1 id="location-name"></h1></div>
+                    <div class="local-time"><span class="live-dot" aria-hidden="true"></span><span id="local-date"></span><span id="local-time"></span></div>
+                </div>
+                <section class="current-section reveal" style="--delay:80ms" aria-labelledby="current-title">
+                    <div class="current-overview">
+                        <div class="current-topline"><h2 class="eyebrow" id="current-title">Jetzt gerade</h2><span class="current-range" id="current-range"></span></div>
+                        <div class="current-center"><div><p class="temperature" id="temperature"></p><p class="weather-description" id="description"></p></div><div class="current-icon" id="current-icon" aria-hidden="true"></div></div>
+                        <div class="current-bottomline"><span id="weather-summary"></span><span id="updated-at"></span></div>
+                    </div>
+                    <div class="current-details"><h2 class="eyebrow">Heute im Detail</h2><dl class="detail-list"><div><dt>Gefühlt</dt><dd id="feels-like"></dd></div><div><dt>Luftfeuchtigkeit</dt><dd id="humidity"></dd></div><div><dt>Wind <span class="wind-direction" id="wind-direction"></span></dt><dd id="wind-speed"></dd></div><div><dt>Regenwahrscheinlichkeit</dt><dd id="rain-chance"></dd></div></dl><div class="sun-times"><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3-3 3 3M3 9l2 2m14 0 2-2"/></svg><span>Sonnenaufgang</span><strong id="sunrise"></strong></div><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3 3 3-3M3 9l2 2m14 0 2-2"/></svg><span>Sonnenuntergang</span><strong id="sunset"></strong></div></div></div>
+                </section>
+                <section class="hourly-section reveal" style="--delay:140ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">Die nächsten Stunden</h2><span>Ein Tag, viele kleine Momente.</span></div><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Stündliche Vorhersage, horizontal scrollbar"></div></section>
+                <section class="forecast-section reveal" style="--delay:200ms" aria-labelledby="forecast-title"><div class="section-heading"><h2 id="forecast-title">Ein Blick nach vorne</h2><span>Die nächsten fünf Tage <span aria-hidden="true">↗</span></span></div><div class="forecast-list" id="forecast"></div><p class="forecast-hint">Wähle einen Tag für die Details.</p></section>
             </div>
-            <div class="detail-item">
-                <span class="detail-label">Humidity:</span>
-                <span id="humidity"></span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Wind speed:</span>
-                <span id="wind-speed"></span>
-            </div>
-        </div>
-        <div id="forecast"></div>
+        </main>
+        <footer class="site-footer"><span>Für jeden Himmel.</span><span>Vorhersage von <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
     </div>
-    <div id="day-details" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modal-date"></h2>
-            <div id="modal-details"></div>
-        </div>
-    </div>
-    <script src="weather.js"></script>
+    <dialog class="day-dialog" id="day-details" aria-labelledby="modal-date"><div class="dialog-topline"><span class="eyebrow">Dein Tagesausblick</span><button class="dialog-close" type="button" aria-label="Details schließen"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><h2 id="modal-date"></h2><p class="dialog-description" id="modal-description"></p><div class="dialog-weather"><div id="modal-icon" aria-hidden="true"></div><p id="modal-temperature"></p></div><dl class="dialog-details" id="modal-details"></dl><p class="dialog-note">Ein Ausblick, kein Versprechen. Das Wetter bleibt das Wetter.</p></dialog>
+    <noscript><p class="noscript-note">Bitte aktiviere JavaScript, um die Wettervorhersage anzuzeigen.</p></noscript>
 </body>
 </html>

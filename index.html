@@ -1,199 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <link rel="icon" type="png" href="JWeather.png">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JWeather Forecast</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #121212;
-            --container-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --highlight-color: #2c2c2c;
-            --accent-color: #bb86fc;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .container {
-            background-color: var(--container-bg);
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 0.5s ease-out;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--accent-color);
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-
-        .search-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 4px;
-            background-color: var(--highlight-color);
-            color: var(--text-color);
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--accent-color);
-        }
-
-        #suggestions {
-            list-style-type: none;
-            padding: 0;
-            margin-top: 0.5rem;
-            width: 100%;
-        }
-
-        #suggestions li {
-            cursor: pointer;
-            padding: 0.75rem;
-            background-color: var(--highlight-color);
-            margin-bottom: 2px;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        #suggestions li:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInSuggestion {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.5;
-        }
-
-        .background-animation span {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            animation: float 15s infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0) translateX(0);
-            }
-            50% {
-                transform: translateY(-100px) translateX(100px);
-            }
-            100% {
-                transform: translateY(0) translateX(0);
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f0e9">
+    <meta name="description" content="Das Wetter, auf das Wesentliche reduziert. Aktuelle Bedingungen und die nächsten fünf Tage – für deinen Ort.">
+    <title>Jweather — Wetter. Ganz in Ruhe.</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="weather.css">
+    <script src="weather.js" defer></script>
 </head>
-<body>
-    <div class="background-animation" id="backgroundAnimation"></div>
-    <div class="container">
-        <h1>JWeather Forecast</h1>
-        <div class="search-container">
-            <input type="text" id="location" placeholder="Enter a location">
-            <ul id="suggestions"></ul>
-        </div>
+<body data-page="home">
+    <a class="skip-link" href="#main">Zum Inhalt</a>
+    <div class="site-shell">
+        <header class="site-header reveal">
+            <a class="wordmark" href="index.html" aria-label="Jweather Startseite">
+                <svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6.1 6.1l2.8 2.8m14.2 14.2 2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></svg>
+                jweather<span class="wordmark-dot">.</span>
+            </a>
+            <span class="header-note">Ein guter Tag beginnt mit einem Blick nach draußen.</span>
+            <time class="header-date" id="today-date"></time>
+        </header>
+        <main id="main" class="home-main">
+            <section class="home-intro reveal" style="--delay:80ms" aria-labelledby="home-title">
+                <p class="eyebrow"><span class="small-line"></span> Das Wetter. Das Wesentliche.</p>
+                <h1 id="home-title">Wetter.<br><em>Ganz in Ruhe.</em></h1>
+                <p class="intro-copy">Für große Pläne und kleine Spaziergänge.<br>Finde heraus, was der Himmel heute vorhat.</p>
+                <div class="search-area" data-search>
+                    <form class="search-form" role="search" autocomplete="off">
+                        <label class="sr-only" for="location-search">Stadt oder Ort suchen</label>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>
+                        <input id="location-search" name="location" type="search" placeholder="Welcher Ort darf es sein?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">
+                        <button class="search-submit" type="submit" aria-label="Ort suchen"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
+                    </form>
+                    <ul class="search-results" id="search-results" role="listbox" aria-label="Gefundene Orte" hidden></ul>
+                    <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
+                </div>
+                <button class="location-button" id="use-location" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg> Meinen Standort verwenden <span aria-hidden="true">↗</span></button>
+            </section>
+            <figure class="weather-art reveal" style="--delay:160ms" aria-label="Abstrakte Illustration einer Sonne über dem Horizont">
+                <div class="art-topline"><span>Ein bisschen Perspektive.</span><span aria-hidden="true">01 / 01</span></div>
+                <svg class="horizon-art" viewBox="0 0 520 490" fill="none" aria-hidden="true">
+                    <defs><clipPath id="above-horizon"><path d="M0 0h520v320H0z"/></clipPath></defs>
+                    <g class="art-orbits"><ellipse cx="260" cy="247" rx="222" ry="183"/><ellipse cx="260" cy="247" rx="179" ry="183"/><ellipse cx="260" cy="247" rx="110" ry="183"/><path d="M38 247h444M67 158h386M69 335h382"/></g>
+                    <g clip-path="url(#above-horizon)"><circle class="art-sun" cx="260" cy="250" r="99"/></g>
+                    <path class="art-horizon" d="M20 321h480"/>
+                    <g class="art-waves"><path d="M73 343h374M92 362h336M119 381h282M156 400h208"/></g>
+                    <path class="art-cross" d="M260 37v16m-8-8h16M18 247h16m-8-8v16M486 247h16m-8-8v16"/>
+                </svg>
+                <figcaption><span>Weniger Rauschen.<br><strong>Mehr Aussicht.</strong></span><span class="art-coordinate" aria-hidden="true">N 52° 31′<br>E 13° 24′</span></figcaption>
+            </figure>
+            <section class="places-section reveal" style="--delay:240ms" aria-labelledby="places-title">
+                <div class="section-heading"><h2 id="places-title">Ein Ort zum Anfangen</h2><span>Oder irgendwo ganz anders.</span></div>
+                <div class="place-links">
+                    <a href="weather.html?lat=52.52&amp;lon=13.405&amp;name=Berlin&amp;country=Deutschland"><span class="place-number">01</span><span>Berlin</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                    <a href="weather.html?lat=53.5511&amp;lon=9.9937&amp;name=Hamburg&amp;country=Deutschland"><span class="place-number">02</span><span>Hamburg</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                    <a href="weather.html?lat=48.1351&amp;lon=11.582&amp;name=M%C3%BCnchen&amp;country=Deutschland"><span class="place-number">03</span><span>München</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                </div>
+            </section>
+            <section class="recent-section" id="recent-places" aria-labelledby="recent-title" hidden><h2 class="eyebrow" id="recent-title">Zuletzt angesehen</h2><div id="recent-links" class="recent-links"></div></section>
+        </main>
+        <footer class="site-footer"><span>Für jeden Himmel.</span><span>Wetterdaten von <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
     </div>
-    <script>
-        const input = document.getElementById('location');
-        const suggestionsList = document.getElementById('suggestions');
-
-        input.addEventListener('input', async () => {
-            const query = input.value.trim();
-            if (query.length < 3) {
-                suggestionsList.innerHTML = '';
-                return;
-            }
-
-            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=5&language=en&format=json`);
-            const data = await response.json();
-
-            suggestionsList.innerHTML = '';
-            if (data.results) {
-                data.results.forEach((result, index) => {
-                    const li = document.createElement('li');
-                    li.textContent = `${result.name}, ${result.country}`;
-                    li.style.animationDelay = `${index * 0.1}s`;
-                    li.style.animation = 'fadeInSuggestion 0.3s ease-out forwards';
-                    li.addEventListener('click', () => {
-                        window.location.href = `weather.html?lat=${result.latitude}&lon=${result.longitude}&name=${encodeURIComponent(result.name)}`;
-                    });
-                    suggestionsList.appendChild(li);
-                });
-            }
-        });
-
-        // Background animation
-        const backgroundAnimation = document.getElementById('backgroundAnimation');
-        const numberOfParticles = 50;
-
-        for (let i = 0; i < numberOfParticles; i++) {
-            const span = document.createElement('span');
-            span.style.left = `${Math.random() * 100}%`;
-            span.style.top = `${Math.random() * 100}%`;
-            span.style.animationDelay = `${Math.random() * 15}s`;
-            backgroundAnimation.appendChild(span);
-        }
-    </script>
+    <noscript><p class="noscript-note">Bitte aktiviere JavaScript, um Orte zu suchen und das Wetter abzurufen.</p></noscript>
 </body>
 </html>
