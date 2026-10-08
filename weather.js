@@ -13,6 +13,47 @@
             catch { /* Private browsing and disabled storage still allow the weather to work. */ }
         }
     };
+    function syncThemeColor() {
+        const color = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta && color) meta.content = color;
+    }
+    function setupAppearance() {
+        const picker = $('theme-picker');
+        if (!picker) return;
+        const summary = picker.querySelector('summary');
+        const choices = picker.querySelectorAll('[data-theme-choice]');
+        const labels = { auto: 'Automatisch', light: 'Hell', dark: 'Dunkel' };
+        const symbols = {
+            auto: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v4m-4 0h8"/>',
+            light: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+            dark: '<path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/>'
+        };
+        function sync() {
+            const preference = window.JweatherTheme?.getPreference() || 'auto';
+            choices.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference)));
+            summary.setAttribute('aria-label', `Darstellung ändern: ${labels[preference]}`);
+            summary.title = `Darstellung: ${labels[preference]}`;
+            picker.querySelector('.theme-symbol').innerHTML = symbols[preference];
+            syncThemeColor();
+        }
+        choices.forEach((button) => button.addEventListener('click', () => {
+            window.JweatherTheme?.setPreference(button.dataset.themeChoice);
+            picker.open = false;
+            summary.focus();
+        }));
+        document.addEventListener('pointerdown', (event) => { if (!picker.contains(event.target)) picker.open = false; });
+        document.addEventListener('focusin', (event) => { if (!picker.contains(event.target)) picker.open = false; });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && picker.open) {
+                event.preventDefault();
+                picker.open = false;
+                summary.focus();
+            }
+        });
+        window.addEventListener('jweather:themechange', sync);
+        sync();
+    }
     const isNumber = (value) => typeof value === 'number' && Number.isFinite(value);
     const validPlace = (place) => place && isNumber(place.latitude) && Math.abs(place.latitude) <= 90
         && isNumber(place.longitude) && Math.abs(place.longitude) <= 180 && typeof place.name === 'string';
@@ -73,6 +114,18 @@
         let controller;
         let lastQuery = '';
 
+        function positionResults() {
+            if (list.hidden) return;
+            const rect = area.querySelector('.search-control').getBoundingClientRect();
+            const viewport = window.visualViewport;
+            const top = viewport?.offsetTop || 0;
+            const bottom = top + (viewport?.height || window.innerHeight);
+            const below = Math.max(0, bottom - rect.bottom - 16);
+            const above = Math.max(0, rect.top - top - 16);
+            const openAbove = below < 180 && above > below;
+            list.dataset.placement = openAbove ? 'above' : 'below';
+            list.style.setProperty('--search-results-height', `${Math.max(48, openAbove ? above : below)}px`);
+        }
         function hide() {
             list.hidden = true;
             input.setAttribute('aria-expanded', 'false');
@@ -141,6 +194,7 @@
                     list.append(item);
                 });
                 list.hidden = results.length === 0;
+                positionResults();
                 input.setAttribute('aria-expanded', String(results.length > 0));
                 status.textContent = results.length ? `${results.length} Orte gefunden. Wähle deinen Ort.`
                     : 'Kein Ort gefunden. Versuche einen anderen Namen.';
@@ -166,6 +220,7 @@
                 if (!results.length) return;
                 event.preventDefault();
                 list.hidden = false;
+                positionResults();
                 input.setAttribute('aria-expanded', 'true');
                 highlight(event.key === 'ArrowDown' ? (active + 1) % results.length
                     : (active <= 0 ? results.length - 1 : active - 1));
@@ -178,6 +233,10 @@
         });
         document.addEventListener('pointerdown', (event) => { if (!area.contains(event.target)) cancel(); });
         document.addEventListener('focusin', (event) => { if (!area.contains(event.target)) cancel(); });
+        window.addEventListener('resize', positionResults, { passive: true });
+        window.addEventListener('scroll', positionResults, { passive: true });
+        window.visualViewport?.addEventListener('resize', positionResults, { passive: true });
+        window.visualViewport?.addEventListener('scroll', positionResults, { passive: true });
     }
 
     function setupHome() {
@@ -244,6 +303,14 @@
     const timePart = (value) => typeof value === 'string' && /T\d{2}:\d{2}/.test(value) ? value.split('T')[1].slice(0, 5) : '—';
     const dateLabel = (value, options) => new Intl.DateTimeFormat('de-DE', { ...options, timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
     const measure = (value, suffix) => isNumber(value) ? `${number.format(value)}${suffix}` : '—';
+    function applyWeatherAppearance(current) {
+        const root = document.documentElement;
+        root.dataset.weather = conditions[current.weather_code]?.[1] || 'unknown';
+        root.dataset.daylight = current.is_day === 0 ? 'night' : 'day';
+        const wind = isNumber(current.wind_speed_10m) ? current.wind_speed_10m : 0;
+        root.style.setProperty('--weather-duration', `${Math.max(7, 16 - Math.max(0, wind) / 6)}s`);
+        syncThemeColor();
+    }
     let unit = storage.get('jweather.unit', 'celsius') === 'fahrenheit' ? 'fahrenheit' : 'celsius';
     let weather;
     let place;
@@ -404,6 +471,7 @@
     function renderWeather() {
         const current = weather.current;
         const daily = weather.daily;
+        applyWeatherAppearance(current);
         $('location-name').textContent = place.name;
         $('location-region').textContent = [...new Set([place.admin1, place.country].filter(Boolean))].join(' · ') || 'Dein Wetter vor Ort';
         document.title = `${place.name} — Jweather`;
@@ -493,6 +561,7 @@
         document.addEventListener('visibilitychange', () => { if (weather && !document.hidden) updateClock(); });
         loadWeather();
     }
+    setupAppearance();
     if (document.body.dataset.page === 'home') setupHome();
     if (document.body.dataset.page === 'weather') setupWeather();
 })();

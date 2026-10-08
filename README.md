@@ -10,10 +10,15 @@ Ein schlichtes Wetterjournal in Beige, Schwarz und warmen Grautönen. Statisches
 - Sonnenaufgang, Sonnenuntergang und Regenwahrscheinlichkeit
 - Die nächsten acht Stunden und fünf Tage mit Tagesdetails
 - Umschaltbare Celsius-/Fahrenheit-Anzeige und zuletzt angesehene Orte
+- Helle und dunkle Darstellung; „Automatisch“ folgt der Systemeinstellung, die manuelle Wahl bleibt beim Seitenwechsel erhalten
+- Wetterabhängige Farbstimmung und ruhige Effekte für Sonne, Wolken, Regen, Schnee, Nebel, Gewitter und klare Nächte
+- Suchvorschläge über der Illustration, mit platzabhängiger Öffnung nach oben oder unten
 - Mobile Ansicht, native Dialoge, sichtbarer Tastaturfokus und reduzierte Animationen bei `prefers-reduced-motion`
 - Verständliche Lade-, Fehler- und Wiederholungszustände
 
-Die Schriftarten **DM Sans** und **Instrument Serif** werden lokal ausgeliefert. Ihre SIL-OFL-Lizenzen liegen in `assets/fonts/`. Es werden keine Google-Fonts-Anfragen gestellt. Der Browser ruft nur die öffentlichen Open-Meteo-Dienste für Ortssuche und Wetter ab. Ein Standort wird erst nach Klick und Browserfreigabe verwendet; zuletzt angesehene Orte und die gewählte Einheit werden nur lokal gespeichert.
+Die Schriftarten **DM Sans** und **Instrument Serif** werden lokal ausgeliefert. Ihre SIL-OFL-Lizenzen liegen in `assets/fonts/`. Es werden keine Google-Fonts-Anfragen gestellt. Der Browser ruft nur die öffentlichen Open-Meteo-Dienste für Ortssuche und Wetter ab. Ein Standort wird erst nach Klick und Browserfreigabe verwendet; zuletzt angesehene Orte, die gewählte Einheit und die Darstellung werden nur lokal gespeichert.
+
+Über das Darstellungssymbol oben rechts lässt sich zwischen **Automatisch**, **Hell** und **Dunkel** wechseln. Die Wetterlage verändert die Farbstimmung unabhängig davon; Nachtwerte zeigen passende Symbole und bei klarem Himmel Sterne. `theme.js` lädt die gespeicherte Darstellung vor dem Stylesheet. Die Effekte bleiben auf den aktuellen Wetterbereich begrenzt und respektieren `prefers-reduced-motion`.
 
 ## Lokal starten
 
@@ -67,7 +72,7 @@ Mit einem bereits installierten Chromium lässt sich der Download vermeiden:
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm test
 ```
 
-Die Tests starten ihren statischen Server selbst. Sie prüfen den kompletten Such- und Wetterablauf, Desktop- und Mobilansichten (320–1440 px), Projektpfade, Einheitenwechsel, Dialoge, Netzwerkfehler, ungültige Daten, verspätete Suchantworten, Standortfreigaben und deaktivierten lokalen Speicher. Die API-Antworten sind für wiederholbare Tests kontrolliert; die Tests benötigen keinen Zugang zu Open-Meteo.
+Die Tests starten ihren statischen Server selbst. Sie prüfen den kompletten Such- und Wetterablauf, Desktop- und Mobilansichten (320–1440 px), Projektpfade, Einheitenwechsel, Dialoge, Netzwerkfehler, ungültige Daten, verspätete Suchantworten, Standortfreigaben und deaktivierten lokalen Speicher. Außerdem prüfen sie die Systemdarstellung, gespeicherte Theme-Wahl, Synchronisierung zwischen Tabs, Wettereffekte, reduzierte Animationen und die tatsächliche Klickbarkeit der Suchvorschläge über der Illustration. Die API-Antworten sind für wiederholbare Tests kontrolliert; die Tests benötigen keinen Zugang zu Open-Meteo.
 
 ## Daten und Grenzen
 

@@ -9,8 +9,9 @@
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="weather.css">
-    <script src="weather.js" defer></script>
+    <script src="theme.js?v=20261008.2"></script>
+    <link rel="stylesheet" href="weather.css?v=20261008.2">
+    <script src="weather.js?v=20261008.2" defer></script>
 </head>
 <body data-page="home">
     <a class="skip-link" href="#main">Zum Inhalt</a>
@@ -21,7 +22,17 @@
                 jweather<span class="wordmark-dot">.</span>
             </a>
             <span class="header-note">Ein guter Tag beginnt mit einem Blick nach draußen.</span>
-            <time class="header-date" id="today-date"></time>
+            <div class="header-actions"><time class="header-date" id="today-date"></time>
+                <details class="theme-picker" id="theme-picker">
+                    <summary aria-label="Darstellung ändern" title="Darstellung ändern"><svg class="theme-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/></svg></summary>
+                    <div class="theme-options" role="group" aria-label="Darstellung">
+                        <span class="theme-menu-label">Darstellung</span>
+                        <button type="button" data-theme-choice="auto" aria-pressed="true">Automatisch <span>System</span></button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Hell <span aria-hidden="true">☼</span></button>
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dunkel <span aria-hidden="true">☾</span></button>
+                    </div>
+                </details>
+            </div>
         </header>
         <main id="main" class="home-main">
             <section class="home-intro reveal" style="--delay:80ms" aria-labelledby="home-title">
@@ -29,13 +40,15 @@
                 <h1 id="home-title">Wetter.<br><em>Ganz in Ruhe.</em></h1>
                 <p class="intro-copy">Für große Pläne und kleine Spaziergänge.<br>Finde heraus, was der Himmel heute vorhat.</p>
                 <div class="search-area" data-search>
-                    <form class="search-form" role="search" autocomplete="off">
-                        <label class="sr-only" for="location-search">Stadt oder Ort suchen</label>
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>
-                        <input id="location-search" name="location" type="search" placeholder="Welcher Ort darf es sein?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">
-                        <button class="search-submit" type="submit" aria-label="Ort suchen"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
-                    </form>
-                    <ul class="search-results" id="search-results" role="listbox" aria-label="Gefundene Orte" hidden></ul>
+                    <div class="search-control">
+                        <form class="search-form" role="search" autocomplete="off">
+                            <label class="sr-only" for="location-search">Stadt oder Ort suchen</label>
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>
+                            <input id="location-search" name="location" type="search" placeholder="Welcher Ort darf es sein?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">
+                            <button class="search-submit" type="submit" aria-label="Ort suchen"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
+                        </form>
+                        <ul class="search-results" id="search-results" role="listbox" aria-label="Gefundene Orte" hidden></ul>
+                    </div>
                     <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
                 </div>
                 <button class="location-button" id="use-location" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg> Meinen Standort verwenden <span aria-hidden="true">↗</span></button>

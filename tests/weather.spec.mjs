@@ -230,3 +230,153 @@ test('blocked storage and reduced motion keep the whole weather flow functional'
     await page.locator('.forecast-item').first().click();
     await expect(page.getByRole('dialog')).toBeVisible();
 });
+
+async function chooseTheme(page, choice) {
+    await page.locator('#theme-picker summary').click();
+    await page.locator(`[data-theme-choice="${choice}"]`).click();
+}
+
+test('appearance follows the system, persists overrides and switches back to automatic', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('./');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme-preference', 'auto');
+    await chooseTheme(page, 'light');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await chooseTheme(page, 'dark');
+    await openWeather(page);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-weather', 'rain');
+    await page.emulateMedia({ colorScheme: 'light' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await chooseTheme(page, 'auto');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(await page.locator('meta[name="theme-color"]').getAttribute('content')).toBe('#1c2021');
+});
+
+test('manual dark mode works when local storage is unavailable', async ({ page }) => {
+    await page.addInitScript(() => {
+        Storage.prototype.getItem = () => { throw new Error('Storage disabled'); };
+        Storage.prototype.setItem = () => { throw new Error('Storage disabled'); };
+    });
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('./');
+    await chooseTheme(page, 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.getByRole('combobox').fill('Berlin');
+    await page.route('https://geocoding-api.open-meteo.com/**', route => route.fulfill({ json: geocoding }));
+    await page.getByRole('combobox').press('Enter');
+    await expect(page.getByRole('option')).toHaveCount(2);
+});
+
+test('appearance choice is synchronized between open tabs without changing the weather', async ({ page, context }) => {
+    await openWeather(page);
+    const other = await context.newPage();
+    await other.goto('./');
+    await chooseTheme(other, 'dark');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('#temperature')).toHaveText('14°');
+    await expect(page.locator('html')).toHaveAttribute('data-weather', 'rain');
+    await other.close();
+});
+
+for (const [code, mood, effect] of [[0, 'sun', '.atmosphere-halo'], [3, 'cloud', '.atmosphere-haze'],
+    [61, 'rain', '.atmosphere-rain'], [73, 'snow', '.atmosphere-snow'], [45, 'fog', '.atmosphere-haze'],
+    [95, 'storm', '.atmosphere-rain']]) {
+    test(`${mood} weather has a distinct atmosphere in both appearances without changing forecast data`, async ({ page }) => {
+        await page.emulateMedia({ colorScheme: 'light' });
+        await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: {
+            ...fixture, current: { ...fixture.current, weather_code: code }
+        } }));
+        await page.goto(weatherPath);
+        await expect(page.locator('#weather-content')).toBeVisible();
+        await expect(page.locator('html')).toHaveAttribute('data-weather', mood);
+        await expect(page.locator(effect)).toBeVisible();
+        const lightPanel = await page.locator('.current-overview').evaluate(el => getComputedStyle(el).backgroundColor);
+        await chooseTheme(page, 'dark');
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+        await expect(page.locator('#temperature')).toHaveText('14°');
+        await expect(page.locator('.forecast-item')).toHaveCount(5);
+        // Wait for the palette transition, then verify a real visual change.
+        await expect.poll(() => page.locator('.current-overview').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe(lightPanel);
+        await expect(page.locator(effect)).toBeVisible();
+    });
+}
+
+test('clear night uses the moon and stars, respecting an explicit light appearance', async ({ page }) => {
+    await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: {
+        ...fixture, current: { ...fixture.current, weather_code: 0, is_day: 0 }
+    } }));
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto(weatherPath);
+    await expect(page.locator('#description')).toHaveText('Klare Nacht');
+    await expect(page.locator('html')).toHaveAttribute('data-daylight', 'night');
+    await expect(page.locator('.atmosphere-stars')).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.locator('#current-icon .sun-rays')).toHaveCount(0);
+    await chooseTheme(page, 'dark');
+    await expect(page.locator('.atmosphere-stars')).toBeVisible();
+});
+
+for (const width of [320, 390, 768, 1440]) {
+    test(`search options stay above the artwork and receive clicks at ${width}px in dark and light mode`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 1100 });
+        const sixPlaces = { results: Array.from({ length: 6 }, (_, i) => ({
+            ...geocoding.results[0], name: i ? `Frankfurt ${i}` : 'Frankfurt am Main'
+        })) };
+        await page.route('https://geocoding-api.open-meteo.com/**', route => route.fulfill({ json: sixPlaces }));
+        await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: fixture }));
+        await page.goto('./');
+        for (const appearance of ['dark', 'light']) {
+            await chooseTheme(page, appearance);
+            await page.getByRole('combobox').fill('Frankfurt');
+            await page.getByRole('combobox').press('Enter');
+            await expect(page.getByRole('option')).toHaveCount(6);
+            const visibleOptionsAreClickable = await page.locator('.search-result').evaluateAll(items => items.every(el => {
+                const r = el.getBoundingClientRect();
+                const parent = el.parentElement.getBoundingClientRect();
+                if (r.top < parent.top || r.bottom > parent.bottom) return true;
+                return el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+            }));
+            expect(visibleOptionsAreClickable).toBe(true);
+            expect(await page.locator('#search-results').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+            expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+            await page.getByRole('combobox').press('Escape');
+            await page.getByRole('combobox').fill('');
+        }
+        await page.getByRole('combobox').fill('Frankfurt');
+        await expect(page.getByRole('option')).toHaveCount(6);
+        await page.getByRole('option').nth(3).click();
+        await expect(page.locator('#location-name')).toHaveText('Frankfurt 3');
+    });
+}
+
+test('search results open above the field when space below is limited', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 560 });
+    await mockAPIs(page);
+    await page.goto('./');
+    await page.getByRole('combobox').fill('Berlin');
+    await expect(page.getByRole('option')).toHaveCount(2);
+    await expect(page.locator('#search-results')).toHaveAttribute('data-placement', 'above');
+    const bounds = await page.locator('#search-results').boundingBox();
+    expect(bounds.y).toBeGreaterThanOrEqual(0);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(560);
+    await page.getByRole('option').last().click();
+    await expect(page).toHaveURL(/lon=-71.18/);
+});
+
+test('weather effects and theme transitions respect reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
+    await openWeather(page);
+    expect(await page.locator('.atmosphere-rain').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+    expect(await page.locator('body').evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
+    await chooseTheme(page, 'light');
+    await expect(page.locator('#temperature')).toHaveText('14°');
+});

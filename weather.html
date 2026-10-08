@@ -9,16 +9,28 @@
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="weather.css">
-    <script src="weather.js" defer></script>
+    <script src="theme.js?v=20261008.2"></script>
+    <link rel="stylesheet" href="weather.css?v=20261008.2">
+    <script src="weather.js?v=20261008.2" defer></script>
 </head>
 <body data-page="weather">
     <a class="skip-link" href="#main">Zum Inhalt</a>
     <div class="site-shell">
         <header class="site-header reveal">
             <a class="wordmark" href="index.html" aria-label="Jweather Startseite"><svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6.1 6.1l2.8 2.8m14.2 14.2 2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></svg>jweather<span class="wordmark-dot">.</span></a>
-            <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Anderer Ort</a>
-            <div class="unit-switch" role="group" aria-label="Temperatureinheit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
+            <div class="header-actions">
+                <a class="back-link" href="index.html" aria-label="Anderer Ort"><span aria-hidden="true">←</span><span class="back-link-label">Anderer Ort</span></a>
+                <div class="unit-switch" role="group" aria-label="Temperatureinheit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
+                <details class="theme-picker" id="theme-picker">
+                    <summary aria-label="Darstellung ändern" title="Darstellung ändern"><svg class="theme-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/></svg></summary>
+                    <div class="theme-options" role="group" aria-label="Darstellung">
+                        <span class="theme-menu-label">Darstellung</span>
+                        <button type="button" data-theme-choice="auto" aria-pressed="true">Automatisch <span>System</span></button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Hell <span aria-hidden="true">☼</span></button>
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dunkel <span aria-hidden="true">☾</span></button>
+                    </div>
+                </details>
+            </div>
         </header>
         <main id="main" class="weather-main" aria-busy="true">
             <section class="load-state" id="load-state" role="status" aria-live="polite">
@@ -35,6 +47,14 @@
                 </div>
                 <section class="current-section reveal" style="--delay:80ms" aria-labelledby="current-title">
                     <div class="current-overview">
+                        <div class="weather-atmosphere" aria-hidden="true">
+                            <div class="atmosphere-halo"></div><div class="atmosphere-haze"></div>
+                            <svg class="atmosphere-marks" viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice" fill="none">
+                                <g class="atmosphere-rain"><path d="m260 20-5 14m96-12-5 14m107 12-5 14m97-12-5 14M290 111l-5 14m100 14-5 14m105-22-5 14m83 37-5 14M257 222l-5 14m92 8-5 14m111-13-5 14m112 13-5 14M310 303l-5 14m175-16-5 14"/></g>
+                                <g class="atmosphere-snow"><circle cx="280" cy="45" r="2"/><circle cx="380" cy="30" r="1.5"/><circle cx="460" cy="80" r="2.5"/><circle cx="550" cy="40" r="1.5"/><circle cx="310" cy="143" r="1.5"/><circle cx="390" cy="173" r="2"/><circle cx="530" cy="139" r="2.5"/><circle cx="270" cy="260" r="1.5"/><circle cx="370" cy="285" r="2.5"/><circle cx="465" cy="243" r="1.5"/><circle cx="560" cy="285" r="2"/></g>
+                                <g class="atmosphere-stars"><path d="M345 50v8m-4-4h8m150 60v6m-3-3h6M530 245v8m-4-4h8"/><circle cx="275" cy="85" r="1"/><circle cx="450" cy="38" r="1"/><circle cx="570" cy="110" r="1.5"/><circle cx="340" cy="245" r="1"/><circle cx="470" cy="285" r="1.2"/></g>
+                            </svg>
+                        </div>
                         <div class="current-topline"><h2 class="eyebrow" id="current-title">Jetzt gerade</h2><span class="current-range" id="current-range"></span></div>
                         <div class="current-center"><div><p class="temperature" id="temperature"></p><p class="weather-description" id="description"></p></div><div class="current-icon" id="current-icon" aria-hidden="true"></div></div>
                         <div class="current-bottomline"><span id="weather-summary"></span><span id="updated-at"></span></div>
