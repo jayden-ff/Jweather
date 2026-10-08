@@ -2,7 +2,7 @@
 
 (() => {
     const $ = (id) => document.getElementById(id);
-    const number = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 });
+    const number = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 });
     const storage = {
         get(key, fallback) {
             try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -23,7 +23,7 @@
         if (!picker) return;
         const summary = picker.querySelector('summary');
         const choices = picker.querySelectorAll('[data-theme-choice]');
-        const labels = { auto: 'Automatisch', light: 'Hell', dark: 'Dunkel' };
+        const labels = { auto: 'Automatic', light: 'Light', dark: 'Dark' };
         const symbols = {
             auto: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 17v4m-4 0h8"/>',
             light: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
@@ -32,8 +32,8 @@
         function sync() {
             const preference = window.JweatherTheme?.getPreference() || 'auto';
             choices.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference)));
-            summary.setAttribute('aria-label', `Darstellung ändern: ${labels[preference]}`);
-            summary.title = `Darstellung: ${labels[preference]}`;
+            summary.setAttribute('aria-label', `Change appearance: ${labels[preference]}`);
+            summary.title = `Appearance: ${labels[preference]}`;
             picker.querySelector('.theme-symbol').innerHTML = symbols[preference];
             syncThemeColor();
         }
@@ -86,15 +86,15 @@
         try {
             const response = await fetch(url, { signal: controller.signal });
             if (!response.ok) throw new Error(response.status === 429
-                ? 'Gerade sind es zu viele Anfragen. Bitte versuche es in einer Minute noch einmal.'
-                : 'Der Wetterdienst ist gerade nicht erreichbar. Bitte versuche es später erneut.');
+                ? 'The weather service is busy. Please try again in a minute.'
+                : 'The weather service is unavailable. Please try again later.');
             const data = await response.json();
-            if (data.error) throw new Error('Für diesen Ort ist gerade keine Vorhersage verfügbar.');
+            if (data.error) throw new Error('No forecast is available for this location right now.');
             return data;
         } catch (error) {
-            if (timedOut) throw new Error('Die Anfrage dauert zu lange. Bitte versuche es erneut.');
-            if (error instanceof TypeError) throw new Error('Keine Verbindung zum Wetterdienst. Prüfe bitte deine Internetverbindung.');
-            if (error instanceof SyntaxError) throw new Error('Die Antwort des Wetterdienstes ist gerade unvollständig. Bitte versuche es erneut.');
+            if (timedOut) throw new Error('The request is taking too long. Please try again.');
+            if (error instanceof TypeError) throw new Error('Cannot connect to the weather service. Please check your internet connection.');
+            if (error instanceof SyntaxError) throw new Error('The weather service returned an incomplete response. Please try again.');
             throw error;
         } finally {
             clearTimeout(timer);
@@ -154,7 +154,7 @@
             if (query.length < 2) {
                 results = [];
                 hide();
-                status.textContent = query ? 'Gib mindestens zwei Zeichen ein.' : '';
+                status.textContent = query ? 'Enter at least two characters.' : '';
                 return;
             }
             controller = new AbortController();
@@ -162,10 +162,10 @@
             results = [];
             hide();
             input.setAttribute('aria-busy', 'true');
-            status.textContent = 'Wir suchen deinen Ort …';
+            status.textContent = 'Finding your place …';
             try {
                 const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
-                url.search = new URLSearchParams({ name: query, count: '6', language: 'de', format: 'json' });
+                url.search = new URLSearchParams({ name: query, count: '6', language: 'en', format: 'json' });
                 const data = await requestJSON(url, current.signal);
                 if (current.signal.aborted || input.value.trim() !== query) return;
                 results = Array.isArray(data.results) ? data.results.filter(validPlace) : [];
@@ -196,8 +196,8 @@
                 list.hidden = results.length === 0;
                 positionResults();
                 input.setAttribute('aria-expanded', String(results.length > 0));
-                status.textContent = results.length ? `${results.length} Orte gefunden. Wähle deinen Ort.`
-                    : 'Kein Ort gefunden. Versuche einen anderen Namen.';
+                status.textContent = results.length ? `${results.length} places found. Choose your location.`
+                    : 'No places found. Try another name.';
             } catch (error) {
                 if (error.name !== 'AbortError' && !current.signal.aborted) status.textContent = error.message;
             } finally {
@@ -242,7 +242,7 @@
     function setupHome() {
         const date = new Date();
         $('today-date').dateTime = date.toISOString().slice(0, 10);
-        $('today-date').textContent = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+        $('today-date').textContent = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
         setupSearch();
         const recent = recentPlaces();
         if (recent.length) {
@@ -257,33 +257,33 @@
         const button = $('use-location');
         const status = $('search-status');
         button.addEventListener('click', () => {
-            if (!navigator.geolocation) { status.textContent = 'Dein Browser unterstützt die Standortabfrage nicht. Suche stattdessen einen Ort.'; return; }
+            if (!navigator.geolocation) { status.textContent = 'Your browser does not support location access. Search for a place instead.'; return; }
             button.disabled = true;
-            status.textContent = 'Dein Standort wird ermittelt …';
+            status.textContent = 'Finding your location …';
             navigator.geolocation.getCurrentPosition((position) => {
-                window.location.assign(placeURL({ latitude: position.coords.latitude, longitude: position.coords.longitude, name: 'Dein Standort' }));
+                window.location.assign(placeURL({ latitude: position.coords.latitude, longitude: position.coords.longitude, name: 'Your location' }));
             }, (error) => {
                 button.disabled = false;
-                status.textContent = error.code === 1 ? 'Standortzugriff nicht erlaubt. Du kannst deinen Ort einfach oben suchen.'
-                    : 'Dein Standort konnte nicht ermittelt werden. Suche deinen Ort oben.';
+                status.textContent = error.code === 1 ? 'Location access was denied. You can search for a place above.'
+                    : 'Your location could not be found. Search for a place above.';
             }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
         });
     }
 
     const conditions = {
-        0: ['Klarer Himmel', 'sun'], 1: ['Überwiegend klar', 'partly'], 2: ['Leicht bewölkt', 'partly'], 3: ['Bedeckt', 'cloud'],
-        45: ['Nebel', 'fog'], 48: ['Gefrierender Nebel', 'fog'],
-        51: ['Leichter Nieselregen', 'rain'], 53: ['Nieselregen', 'rain'], 55: ['Starker Nieselregen', 'rain'],
-        56: ['Gefrierender Nieselregen', 'rain'], 57: ['Starker gefrierender Nieselregen', 'rain'],
-        61: ['Leichter Regen', 'rain'], 63: ['Regen', 'rain'], 65: ['Starker Regen', 'rain'],
-        66: ['Gefrierender Regen', 'rain'], 67: ['Starker gefrierender Regen', 'rain'],
-        71: ['Leichter Schneefall', 'snow'], 73: ['Schneefall', 'snow'], 75: ['Starker Schneefall', 'snow'], 77: ['Schneegriesel', 'snow'],
-        80: ['Leichte Regenschauer', 'rain'], 81: ['Regenschauer', 'rain'], 82: ['Starke Regenschauer', 'rain'],
-        85: ['Leichte Schneeschauer', 'snow'], 86: ['Starke Schneeschauer', 'snow'],
-        95: ['Gewitter', 'storm'], 96: ['Gewitter mit Hagel', 'storm'], 99: ['Starkes Gewitter mit Hagel', 'storm']
+        0: ['Clear skies', 'sun'], 1: ['Mostly clear', 'partly'], 2: ['Partly cloudy', 'partly'], 3: ['Overcast', 'cloud'],
+        45: ['Fog', 'fog'], 48: ['Freezing fog', 'fog'],
+        51: ['Light drizzle', 'rain'], 53: ['Drizzle', 'rain'], 55: ['Heavy drizzle', 'rain'],
+        56: ['Freezing drizzle', 'rain'], 57: ['Heavy freezing drizzle', 'rain'],
+        61: ['Light rain', 'rain'], 63: ['Rain', 'rain'], 65: ['Heavy rain', 'rain'],
+        66: ['Freezing rain', 'rain'], 67: ['Heavy freezing rain', 'rain'],
+        71: ['Light snow', 'snow'], 73: ['Snow', 'snow'], 75: ['Heavy snow', 'snow'], 77: ['Snow grains', 'snow'],
+        80: ['Light rain showers', 'rain'], 81: ['Rain showers', 'rain'], 82: ['Heavy rain showers', 'rain'],
+        85: ['Light snow showers', 'snow'], 86: ['Heavy snow showers', 'snow'],
+        95: ['Thunderstorm', 'storm'], 96: ['Thunderstorm with hail', 'storm'], 99: ['Severe thunderstorm with hail', 'storm']
     };
-    const condition = (code, isDay = true) => code === 0 && !isDay ? 'Klare Nacht' : (conditions[code]?.[0] ?? 'Wetterlage unbekannt');
-    const sun = '<circle cx="32" cy="32" r="12"/><g class="sun-rays"><path d="M32 5v7m0 40v7M5 32h7m40 0h7M13 13l5 5m28 28 5 5M13 51l5-5m28-28 5-5"/></g>';
+    const condition = (code, isDay = true) => code === 0 && !isDay ? 'Clear night' : (conditions[code]?.[0] ?? 'Conditions unavailable');
+    const sun = '<g class="sun-shape"><circle class="sun-center" cx="32" cy="32" r="12"/><g class="sun-rays"><path d="M32 5v7m0 40v7M5 32h7m40 0h7M13 13l5 5m28 28 5 5M13 51l5-5m28-28 5-5"/></g></g>';
     const moon = '<path d="M44 43A20 20 0 0 1 23 12a20 20 0 1 0 21 31Z"/>';
     const cloud = '<g class="cloud-shape"><path d="M17 42h30a10 10 0 0 0 0-20 15 15 0 0 0-29-1A10.5 10.5 0 0 0 17 42Z"/></g>';
     function icon(code, isDay = true) {
@@ -301,12 +301,26 @@
     }
     const droplet = '<svg class="weather-symbol" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2c-1 2-4 5-4 8a4 4 0 0 0 8 0c0-3-3-6-4-8Z"/></svg>';
     const timePart = (value) => typeof value === 'string' && /T\d{2}:\d{2}/.test(value) ? value.split('T')[1].slice(0, 5) : '—';
-    const dateLabel = (value, options) => new Intl.DateTimeFormat('de-DE', { ...options, timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
+    const dateLabel = (value, options) => new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'UTC' }).format(new Date(`${value}T12:00:00Z`));
     const measure = (value, suffix) => isNumber(value) ? `${number.format(value)}${suffix}` : '—';
-    function applyWeatherAppearance(current) {
+    function solarPhase(current, daily) {
+        if (current.is_day === 0) return 'night';
+        // Compare the API's local wall times on the same synthetic timeline.
+        // This avoids applying the browser's timezone to the selected location.
+        const timestamp = (time) => typeof time === 'string' ? Date.parse(time.slice(0, 16) + 'Z') : NaN;
+        const now = timestamp(current.time);
+        const index = daily.time.indexOf(current.time.slice(0, 10));
+        const rise = timestamp(daily.sunrise?.[index]);
+        const set = timestamp(daily.sunset?.[index]);
+        if (Number.isFinite(set) && set - now >= 0 && set - now <= 90 * 60000) return 'sunset';
+        if (Number.isFinite(rise) && now - rise >= 0 && now - rise <= 60 * 60000) return 'dawn';
+        return 'day';
+    }
+    function applyWeatherAppearance(current, daily) {
         const root = document.documentElement;
         root.dataset.weather = conditions[current.weather_code]?.[1] || 'unknown';
         root.dataset.daylight = current.is_day === 0 ? 'night' : 'day';
+        root.dataset.solarPhase = solarPhase(current, daily);
         const wind = isNumber(current.wind_speed_10m) ? current.wind_speed_10m : 0;
         root.style.setProperty('--weather-duration', `${Math.max(7, 16 - Math.max(0, wind) / 6)}s`);
         syncThemeColor();
@@ -323,7 +337,7 @@
         const lat = params.get('lat');
         const lon = params.get('lon');
         if (!lat?.trim() || !lon?.trim()) return null;
-        const candidate = { latitude: Number(lat), longitude: Number(lon), name: tidy(params.get('name')) || 'Dein Ort',
+        const candidate = { latitude: Number(lat), longitude: Number(lon), name: tidy(params.get('name')) || 'Your place',
             country: tidy(params.get('country')), admin1: tidy(params.get('region')) };
         return validPlace(candidate) ? candidate : null;
     }
@@ -338,16 +352,16 @@
             || dayKeys.some((key) => !Array.isArray(daily[key]) || !daily[key].slice(0, 6).every(isNumber) || daily[key].length < 6)
             || !Array.isArray(hourly?.time) || !hourly.time.length || !Array.isArray(hourly.temperature_2m)
             || !Array.isArray(hourly.weather_code)) {
-            throw new Error('Die Wetterdaten sind gerade unvollständig. Bitte lade sie erneut.');
+            throw new Error('The forecast is incomplete. Please try again.');
         }
         return data;
     }
     function updateClock() {
         let zone = weather.timezone || 'UTC';
-        try { new Intl.DateTimeFormat('de-DE', { timeZone: zone }); } catch { zone = 'UTC'; }
+        try { new Intl.DateTimeFormat('en-GB', { timeZone: zone }); } catch { zone = 'UTC'; }
         const now = new Date();
-        $('local-date').textContent = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: zone }).format(now);
-        $('local-time').textContent = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: zone }).format(now) + ' Ortszeit';
+        $('local-date').textContent = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: zone }).format(now);
+        $('local-time').textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: zone }).format(now) + ' local time';
     }
     function isDayAt(time) {
         const index = weather.daily.time.indexOf(time.slice(0, 10));
@@ -364,7 +378,7 @@
         list.replaceChildren();
         if (start < 0) {
             const note = document.createElement('p');
-            note.textContent = 'Die stündliche Vorhersage ist gerade nicht verfügbar.';
+            note.textContent = 'The hourly forecast is currently unavailable.';
             list.append(note);
             return;
         }
@@ -373,7 +387,7 @@
             item.className = 'hour-item';
             const time = document.createElement('span');
             time.className = 'hour-time';
-            time.textContent = index === start && hourly.time[index] === currentHour ? 'Jetzt' : timePart(hourly.time[index]);
+            time.textContent = index === start && hourly.time[index] === currentHour ? 'Now' : timePart(hourly.time[index]);
             const symbol = document.createElement('span');
             symbol.innerHTML = icon(hourly.weather_code[index], isDayAt(hourly.time[index]));
             const accessible = document.createElement('span');
@@ -387,7 +401,7 @@
             rain.innerHTML = droplet;
             const chance = document.createElement('span');
             chance.textContent = measure(hourly.precipitation_probability?.[index], '%');
-            rain.setAttribute('aria-label', 'Regenwahrscheinlichkeit ' + chance.textContent);
+            rain.setAttribute('aria-label', 'Chance of rain ' + chance.textContent);
             rain.append(chance);
             item.append(time, symbol, accessible, temp, rain);
             list.append(item);
@@ -404,7 +418,7 @@
             item.className = 'forecast-item';
             const day = document.createElement('span');
             day.className = 'forecast-day';
-            day.textContent = index === 1 ? 'Morgen' : dateLabel(daily.time[index], { weekday: 'long' });
+            day.textContent = index === 1 ? 'Tomorrow' : dateLabel(daily.time[index], { weekday: 'long' });
             const date = document.createElement('span');
             date.className = 'forecast-date';
             date.textContent = dateLabel(daily.time[index], { day: '2-digit', month: 'short' });
@@ -420,10 +434,10 @@
             bottom.className = 'forecast-bottom';
             const chance = document.createElement('span');
             chance.textContent = measure(daily.precipitation_probability_max?.[index], '%');
-            chance.setAttribute('aria-label', 'Regenwahrscheinlichkeit ' + chance.textContent);
+            chance.setAttribute('aria-label', 'Chance of rain ' + chance.textContent);
             const rainLabel = document.createElement('span');
             rainLabel.className = 'forecast-rain-label';
-            rainLabel.textContent = ' Regen';
+            rainLabel.textContent = ' rain';
             chance.append(rainLabel);
             const arrow = document.createElement('span');
             arrow.textContent = '↗';
@@ -432,7 +446,7 @@
             item.append(day, date);
             item.insertAdjacentHTML('beforeend', icon(daily.weather_code[index]));
             item.append(temps, bottom);
-            item.setAttribute('aria-label', `${dateLabel(daily.time[index], { weekday: 'long', day: 'numeric', month: 'long' })}: ${condition(daily.weather_code[index])}, maximal ${temperatureWithUnit(daily.temperature_2m_max[index])}, minimal ${temperatureWithUnit(daily.temperature_2m_min[index])}. Details öffnen.`);
+            item.setAttribute('aria-label', `${dateLabel(daily.time[index], { weekday: 'long', day: 'numeric', month: 'long' })}: ${condition(daily.weather_code[index])}, high ${temperatureWithUnit(daily.temperature_2m_max[index])}, low ${temperatureWithUnit(daily.temperature_2m_min[index])}. Open details.`);
             item.addEventListener('click', () => showDayDetails(index));
             list.append(item);
         }
@@ -449,12 +463,12 @@
         low.textContent = temperature(daily.temperature_2m_min[index]);
         $('modal-temperature').append(low);
         const details = [
-            ['Regenwahrscheinlichkeit', measure(daily.precipitation_probability_max?.[index], ' %')],
-            ['Niederschlag', measure(daily.precipitation_sum?.[index], ' mm')],
-            ['Maximaler Wind', measure(daily.wind_speed_10m_max?.[index], ' km/h')],
-            ['UV-Index', measure(daily.uv_index_max?.[index], '')],
-            ['Sonnenaufgang', timePart(daily.sunrise?.[index])],
-            ['Sonnenuntergang', timePart(daily.sunset?.[index])]
+            ['Chance of rain', measure(daily.precipitation_probability_max?.[index], ' %')],
+            ['Precipitation', measure(daily.precipitation_sum?.[index], ' mm')],
+            ['Peak wind', measure(daily.wind_speed_10m_max?.[index], ' km/h')],
+            ['UV index', measure(daily.uv_index_max?.[index], '')],
+            ['Sunrise', timePart(daily.sunrise?.[index])],
+            ['Sunset', timePart(daily.sunset?.[index])]
         ];
         $('modal-details').replaceChildren();
         details.forEach(([label, value]) => {
@@ -471,31 +485,31 @@
     function renderWeather() {
         const current = weather.current;
         const daily = weather.daily;
-        applyWeatherAppearance(current);
+        applyWeatherAppearance(current, daily);
         $('location-name').textContent = place.name;
-        $('location-region').textContent = [...new Set([place.admin1, place.country].filter(Boolean))].join(' · ') || 'Dein Wetter vor Ort';
+        $('location-region').textContent = [...new Set([place.admin1, place.country].filter(Boolean))].join(' · ') || 'Your local forecast';
         document.title = `${place.name} — Jweather`;
         $('temperature').textContent = temperature(current.temperature_2m);
         $('temperature').setAttribute('aria-label', temperatureWithUnit(current.temperature_2m));
         $('description').textContent = condition(current.weather_code, current.is_day !== 0);
         $('current-icon').innerHTML = icon(current.weather_code, current.is_day !== 0);
         $('current-range').textContent = `↑ ${temperature(daily.temperature_2m_max[0])}  ↓ ${temperature(daily.temperature_2m_min[0])}`;
-        $('current-range').setAttribute('aria-label', `Heute maximal ${temperatureWithUnit(daily.temperature_2m_max[0])}, minimal ${temperatureWithUnit(daily.temperature_2m_min[0])}`);
+        $('current-range').setAttribute('aria-label', `Today, high ${temperatureWithUnit(daily.temperature_2m_max[0])}, low ${temperatureWithUnit(daily.temperature_2m_min[0])}`);
         $('feels-like').textContent = temperatureWithUnit(current.apparent_temperature);
         $('humidity').textContent = measure(current.relative_humidity_2m, ' %');
         $('wind-speed').textContent = measure(current.wind_speed_10m, ' km/h');
-        const directions = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
         $('wind-direction').textContent = isNumber(current.wind_direction_10m) ? directions[Math.round(current.wind_direction_10m / 45) % 8] : '';
         $('rain-chance').textContent = measure(daily.precipitation_probability_max?.[0], ' %');
         $('sunrise').textContent = timePart(daily.sunrise?.[0]);
         $('sunset').textContent = timePart(daily.sunset?.[0]);
-        $('updated-at').textContent = `Stand ${timePart(current.time)} Uhr`;
+        $('updated-at').textContent = `Updated ${timePart(current.time)}`;
         const kind = conditions[current.weather_code]?.[1];
-        $('weather-summary').textContent = kind === 'sun' ? (current.is_day === 0 ? 'Ein ruhiger Himmel für die Nacht.' : 'Ein wenig Sonne für deinen Tag.')
-            : kind === 'rain' ? 'Vielleicht kommt der Schirm heute mit.'
-            : kind === 'snow' ? 'Ein Tag für die warme Jacke.'
-            : kind === 'storm' ? 'Behalte den Himmel im Blick.'
-            : 'Jeder Himmel hat seine schönen Seiten.';
+        $('weather-summary').textContent = kind === 'sun' ? (current.is_day === 0 ? 'A clear night ahead.' : 'A little sunshine for your day.')
+            : kind === 'rain' ? 'A good day to bring an umbrella.'
+            : kind === 'snow' ? 'Wrap up before heading out.'
+            : kind === 'storm' ? 'Thunderstorms. Check local weather alerts.'
+            : 'All times are local.';
         updateClock();
         renderHourly();
         renderForecast();
@@ -510,15 +524,15 @@
         $('weather-content').hidden = true;
         $('main').setAttribute('aria-busy', String(!failed));
         $('loading-orbit').hidden = failed;
-        $('load-label').textContent = failed ? 'Kurz bewölkt' : 'Ein Blick nach draußen';
-        $('load-title').textContent = failed ? 'Gerade keine Aussicht.' : 'Das Wetter kommt.';
-        $('load-message').textContent = message || 'Wir holen die aktuelle Vorhersage für deinen Ort.';
+        $('load-label').textContent = failed ? 'A brief interruption' : 'Your local weather';
+        $('load-title').textContent = failed ? 'Weather unavailable.' : 'Getting the forecast.';
+        $('load-message').textContent = message || 'Checking the latest conditions for your location.';
         $('load-actions').hidden = !failed;
         $('retry-weather').hidden = !place;
     }
     async function loadWeather() {
         if (!place) {
-            setLoadState('error', 'Diesem Link fehlt ein gültiger Ort. Suche einfach einen Ort auf der Startseite.');
+            setLoadState('error', 'This link does not include a valid location. Find a place on the home page.');
             return;
         }
         setLoadState('loading');

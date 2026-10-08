@@ -1,23 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-const geocoding = { results: [
-    { name: 'Berlin', country: 'Deutschland', admin1: 'Berlin', latitude: 52.52, longitude: 13.405 },
-    { name: 'Berlin', country: 'Vereinigte Staaten', admin1: 'New Hampshire', latitude: 44.46, longitude: -71.18 }
-] };
-const dates = Array.from({ length: 6 }, (_, i) => `2026-10-${String(8 + i).padStart(2, '0')}`);
-const fixture = {
-    timezone: 'Europe/Berlin',
-    current: { time: '2026-10-08T14:15', temperature_2m: 13.6, apparent_temperature: 10.6,
-        relative_humidity_2m: 79, is_day: 1, weather_code: 61, wind_speed_10m: 20.6, wind_direction_10m: 286 },
-    daily: { time: dates, weather_code: [61, 0, 3, 71, 95, 45],
-        temperature_2m_max: [18, 20, 16, 8, 14, 15], temperature_2m_min: [10, 11, 9, 2, 8, 7],
-        precipitation_probability_max: [80, 5, 30, 70, 90, 20], precipitation_sum: [4, 0, 1, 6, 10, 0],
-        wind_speed_10m_max: [24, 12, 17, 20, 30, 10], uv_index_max: [2, 3, 2, 1, 2, 1],
-        sunrise: dates.map(d => `${d}T07:15`), sunset: dates.map(d => `${d}T18:30`) },
-    hourly: { time: Array.from({ length: 24 }, (_, i) => `2026-10-08T${String(i).padStart(2, '0')}:00`),
-        temperature_2m: Array(24).fill(14), weather_code: Array(24).fill(0), precipitation_probability: Array(24).fill(15) }
-};
-const weatherPath = 'weather.html?lat=52.52&lon=13.405&name=Berlin&country=Deutschland';
+import { fixture, geocoding } from './fixtures.mjs';
+
+const weatherPath = 'weather.html?lat=52.52&lon=13.405&name=Berlin&country=Germany';
 async function mockAPIs(page) {
     await page.route('https://geocoding-api.open-meteo.com/**', route => route.fulfill({ json: geocoding }));
     await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: fixture }));
@@ -36,7 +21,7 @@ for (const width of [320, 390, 768, 1440]) {
         const failedAssets = [];
         page.on('response', response => { if (response.url().includes('127.0.0.1') && response.status() >= 400) failedAssets.push(response.url()); });
         await page.goto('./');
-        await expect(page.getByRole('heading', { name: 'Wetter. Ganz in Ruhe.' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Weather. At a glance.' })).toBeVisible();
         await page.evaluate(() => document.fonts.ready);
         expect(await page.evaluate(() => document.fonts.check('16px "DM Sans"') && document.fonts.check('16px "Instrument Serif"'))).toBe(true);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -66,13 +51,13 @@ test('keyboard search opens the right location and displays current and future w
     await expect(page.locator('#temperature')).toHaveText('14°');
     await expect(page.locator('#feels-like')).toHaveText('11°C');
     await expect(page.locator('#humidity')).toHaveText('79 %');
-    await expect(page.locator('#wind-speed')).toHaveText('20,6 km/h');
+    await expect(page.locator('#wind-speed')).toHaveText('20.6 km/h');
     await expect(page.locator('.hour-item')).toHaveCount(8);
-    await expect(page.locator('.hour-time').first()).toHaveText('Jetzt');
+    await expect(page.locator('.hour-time').first()).toHaveText('Now');
     await expect(page.locator('.hour-time').nth(1)).toHaveText('15:00');
     await expect(page.locator('.forecast-item')).toHaveCount(5);
-    await expect(page.locator('.forecast-day').first()).toHaveText('Morgen');
-    await page.getByRole('link', { name: 'Anderer Ort' }).click();
+    await expect(page.locator('.forecast-day').first()).toHaveText('Tomorrow');
+    await page.getByRole('link', { name: 'Another place' }).click();
     await expect(page.locator('#recent-links')).toContainText('Berlin');
 });
 
@@ -98,7 +83,7 @@ test('day details work with keyboard, return focus, and close on the backdrop', 
     await tomorrow.press('Enter');
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.locator('#modal-details')).toContainText('0 mm');
-    await expect(page.locator('#modal-description')).toHaveText('Klarer Himmel');
+    await expect(page.locator('#modal-description')).toHaveText('Clear skies');
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).not.toBeVisible();
     await expect(tomorrow).toBeFocused();
@@ -106,7 +91,7 @@ test('day details work with keyboard, return focus, and close on the backdrop', 
     await page.mouse.click(5, 5);
     await expect(page.getByRole('dialog')).not.toBeVisible();
     await tomorrow.click();
-    await page.getByRole('button', { name: 'Details schließen' }).click();
+    await page.getByRole('button', { name: 'Close details' }).click();
     await expect(page.getByRole('dialog')).not.toBeVisible();
 });
 
@@ -115,10 +100,10 @@ test('failed forecasts show a useful error and can be retried', async ({ page })
     await page.route('https://api.open-meteo.com/**', route => ++calls === 1
         ? route.fulfill({ status: 503, json: { error: true } }) : route.fulfill({ json: fixture }));
     await page.goto(weatherPath);
-    await expect(page.locator('#load-title')).toHaveText('Gerade keine Aussicht.');
-    await expect(page.locator('#load-message')).toContainText('nicht erreichbar');
+    await expect(page.locator('#load-title')).toHaveText('Weather unavailable.');
+    await expect(page.locator('#load-message')).toContainText('unavailable');
     await expect(page.locator('#weather-content')).not.toBeVisible();
-    await page.getByRole('button', { name: 'Erneut versuchen' }).click();
+    await page.getByRole('button', { name: 'Try again' }).click();
     await expect(page.locator('#weather-content')).toBeVisible();
     await expect(page.locator('#main')).toHaveAttribute('aria-busy', 'false');
     expect(calls).toBe(2);
@@ -127,7 +112,7 @@ test('failed forecasts show a useful error and can be retried', async ({ page })
 test('incomplete weather responses never produce invented or undefined weather', async ({ page }) => {
     await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: { ...fixture, current: {} } }));
     await page.goto(weatherPath);
-    await expect(page.locator('#load-message')).toContainText('unvollständig');
+    await expect(page.locator('#load-message')).toContainText('incomplete');
     await expect(page.locator('#weather-content')).not.toBeVisible();
     await expect(page.locator('body')).not.toContainText('undefined');
 });
@@ -135,7 +120,7 @@ test('incomplete weather responses never produce invented or undefined weather',
 test('a non-JSON provider response produces a readable error', async ({ page }) => {
     await page.route('https://api.open-meteo.com/**', route => route.fulfill({ body: '<html>Unavailable</html>', contentType: 'text/html' }));
     await page.goto(weatherPath);
-    await expect(page.locator('#load-message')).toHaveText('Die Antwort des Wetterdienstes ist gerade unvollständig. Bitte versuche es erneut.');
+    await expect(page.locator('#load-message')).toHaveText('The weather service returned an incomplete response. Please try again.');
     await expect(page.locator('#weather-content')).not.toBeVisible();
 });
 
@@ -144,9 +129,9 @@ for (const query of ['', '?lat=91&lon=0', '?lat=0&lon=181', '?lat=&lon=0', '?lat
         let calls = 0;
         await page.route('https://api.open-meteo.com/**', route => { calls++; return route.fulfill({ json: fixture }); });
         await page.goto('weather.html' + query);
-        await expect(page.locator('#load-message')).toContainText('gültiger Ort');
-        await expect(page.getByRole('button', { name: 'Erneut versuchen' })).not.toBeVisible();
-        await expect(page.getByRole('link', { name: 'Anderen Ort suchen' })).toBeVisible();
+        await expect(page.locator('#load-message')).toContainText('valid location');
+        await expect(page.getByRole('button', { name: 'Try again' })).not.toBeVisible();
+        await expect(page.getByRole('link', { name: 'Find another place' })).toBeVisible();
         expect(calls).toBe(0);
     });
 }
@@ -156,10 +141,10 @@ test('empty results, network failure and escape leave search usable', async ({ p
     await page.goto('./');
     const input = page.getByRole('combobox');
     await input.fill('xyzxyzxyz');
-    await expect(page.locator('#search-status')).toContainText('Kein Ort gefunden');
+    await expect(page.locator('#search-status')).toContainText('No places found');
     await page.route('https://geocoding-api.open-meteo.com/**', route => route.abort('failed'));
     await input.fill('Berlin');
-    await expect(page.locator('#search-status')).toContainText('Keine Verbindung');
+    await expect(page.locator('#search-status')).toContainText('Cannot connect');
     await page.route('https://geocoding-api.open-meteo.com/**', route => route.fulfill({ json: geocoding }));
     await input.press('Enter');
     await expect(page.getByRole('option')).toHaveCount(2);
@@ -178,7 +163,7 @@ test('a slow previous query cannot replace the latest results', async ({ page })
     await page.goto('./');
     const input = page.getByRole('combobox');
     await input.fill('Berlin');
-    await expect(page.locator('#search-status')).toContainText('Wir suchen');
+    await expect(page.locator('#search-status')).toContainText('Finding your place');
     await input.fill('Hamburg');
     await expect(page.getByRole('option')).toContainText('Hamburg');
     await page.waitForTimeout(800);
@@ -202,9 +187,9 @@ test('geolocation success navigates to the current coordinates', async ({ page, 
     await context.setGeolocation({ latitude: 48.1351, longitude: 11.582 });
     await mockAPIs(page);
     await page.goto('./');
-    await page.getByRole('button', { name: 'Meinen Standort verwenden' }).click();
-    await expect(page).toHaveURL(/lat=48.1351&lon=11.582&name=Dein\+Standort/);
-    await expect(page.locator('#location-name')).toHaveText('Dein Standort');
+    await page.getByRole('button', { name: 'Use my location' }).click();
+    await expect(page).toHaveURL(/lat=48.1351&lon=11.582&name=Your\+location/);
+    await expect(page.locator('#location-name')).toHaveText('Your location');
 });
 
 test('denied geolocation offers manual search and reenables the button', async ({ page }) => {
@@ -212,9 +197,9 @@ test('denied geolocation offers manual search and reenables the button', async (
         getCurrentPosition(_success, failure) { failure({ code: 1 }); }
     } }));
     await page.goto('./');
-    await page.getByRole('button', { name: 'Meinen Standort verwenden' }).click();
-    await expect(page.locator('#search-status')).toContainText('Standortzugriff nicht erlaubt');
-    await expect(page.getByRole('button', { name: 'Meinen Standort verwenden' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Use my location' }).click();
+    await expect(page.locator('#search-status')).toContainText('Location access was denied');
+    await expect(page.getByRole('button', { name: 'Use my location' })).toBeEnabled();
 });
 
 test('blocked storage and reduced motion keep the whole weather flow functional', async ({ page }) => {
@@ -316,7 +301,7 @@ test('clear night uses the moon and stars, respecting an explicit light appearan
     } }));
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto(weatherPath);
-    await expect(page.locator('#description')).toHaveText('Klare Nacht');
+    await expect(page.locator('#description')).toHaveText('Clear night');
     await expect(page.locator('html')).toHaveAttribute('data-daylight', 'night');
     await expect(page.locator('.atmosphere-stars')).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -379,4 +364,48 @@ test('weather effects and theme transitions respect reduced motion', async ({ pa
     expect(await page.locator('body').evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
     await chooseTheme(page, 'light');
     await expect(page.locator('#temperature')).toHaveText('14°');
+});
+
+for (const [time, daylight, phase] of [['07:45', 1, 'dawn'], ['14:15', 1, 'day'], ['18:00', 1, 'sunset'], ['21:00', 0, 'night']]) {
+    test(`solar accents follow the location's forecast time at ${time}, not the browser's timezone`, async ({ page }) => {
+        await page.clock.install({ time: new Date('2026-10-08T00:00:00Z') });
+        await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: {
+            ...fixture, current: { ...fixture.current, time: `2026-10-08T${time}`, weather_code: 0, is_day: daylight }
+        } }));
+        await page.goto(weatherPath);
+        await expect(page.locator('#weather-content')).toBeVisible();
+        await expect(page.locator('html')).toHaveAttribute('data-solar-phase', phase);
+        if (phase === 'sunset' || phase === 'dawn') {
+            await expect(page.locator('.atmosphere-halo')).toBeVisible();
+            const gradient = await page.locator('.current-overview').evaluate(el => getComputedStyle(el).backgroundImage);
+            const colours = [...gradient.matchAll(/rgba?\(([^)]+)\)/g)].map(match => match[1].split(',').map(Number));
+            const warmAccent = colours.find(([red, green, blue, alpha = 1]) => red > green && green > blue && alpha > 0);
+            expect(warmAccent, 'dawn and sunset add a visible warm colour to the forecast panel').toBeTruthy();
+        }
+        await chooseTheme(page, 'dark');
+        await expect(page.locator('html')).toHaveAttribute('data-solar-phase', phase);
+        await expect(page.locator('#temperature')).toHaveText('14°');
+    });
+}
+
+test('the interface and location requests use English, including accessible labels', async ({ page }) => {
+    let requestedLanguage;
+    await page.route('https://geocoding-api.open-meteo.com/**', route => {
+        requestedLanguage = new URL(route.request().url()).searchParams.get('language');
+        return route.fulfill({ json: geocoding });
+    });
+    await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: fixture }));
+    await page.goto('./');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('combobox')).toHaveAttribute('placeholder', 'Where are we heading?');
+    await page.getByRole('combobox').fill('Berlin');
+    await page.getByRole('option').first().click();
+    expect(requestedLanguage).toBe('en');
+    await expect(page.locator('#description')).toHaveText('Light rain');
+    await expect(page.locator('#current-range')).toHaveAttribute('aria-label', 'Today, high 18°C, low 10°C');
+    await expect(page.locator('.forecast-day').first()).toHaveText('Tomorrow');
+    await expect(page.locator('#local-time')).toContainText('local time');
+    await page.locator('.forecast-item').first().click();
+    await expect(page.locator('#modal-details')).toContainText('Chance of rain');
+    await expect(page.locator('#modal-details')).toContainText('Sunset');
 });

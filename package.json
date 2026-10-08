@@ -2,11 +2,12 @@
   "name": "jweather",
   "version": "2.0.0",
   "private": true,
-  "description": "A quiet, static weather journal. No runtime dependencies or build step.",
+  "description": "Current conditions, the hours ahead, and a five-day forecast.",
   "scripts": {
     "dev": "node tests/server.mjs",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "screenshots": "node tests/screenshots.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0"

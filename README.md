@@ -1,85 +1,93 @@
-# Jweather
+<div align="center">
 
-Ein schlichtes Wetterjournal in Beige, Schwarz und warmen Grautönen. Statisches HTML, CSS und JavaScript, ohne Framework, API-Schlüssel oder Build-Schritt.
+# jweather.
 
-## Funktionen
+Current conditions. The hours ahead. A five-day outlook.
 
-- Ortssuche mit Vorschlägen, regionaler Zuordnung und Tastaturbedienung
-- Standortabfrage auf ausdrücklichen Klick
-- Aktuelles Wetter mit gefühlter Temperatur, Luftfeuchtigkeit und Wind
-- Sonnenaufgang, Sonnenuntergang und Regenwahrscheinlichkeit
-- Die nächsten acht Stunden und fünf Tage mit Tagesdetails
-- Umschaltbare Celsius-/Fahrenheit-Anzeige und zuletzt angesehene Orte
-- Helle und dunkle Darstellung; „Automatisch“ folgt der Systemeinstellung, die manuelle Wahl bleibt beim Seitenwechsel erhalten
-- Wetterabhängige Farbstimmung und ruhige Effekte für Sonne, Wolken, Regen, Schnee, Nebel, Gewitter und klare Nächte
-- Suchvorschläge über der Illustration, mit platzabhängiger Öffnung nach oben oder unten
-- Mobile Ansicht, native Dialoge, sichtbarer Tastaturfokus und reduzierte Animationen bei `prefers-reduced-motion`
-- Verständliche Lade-, Fehler- und Wiederholungszustände
+[Open Jweather ↗](https://jayden-ff.github.io/Jweather/)
 
-Die Schriftarten **DM Sans** und **Instrument Serif** werden lokal ausgeliefert. Ihre SIL-OFL-Lizenzen liegen in `assets/fonts/`. Es werden keine Google-Fonts-Anfragen gestellt. Der Browser ruft nur die öffentlichen Open-Meteo-Dienste für Ortssuche und Wetter ab. Ein Standort wird erst nach Klick und Browserfreigabe verwendet; zuletzt angesehene Orte, die gewählte Einheit und die Darstellung werden nur lokal gespeichert.
+</div>
 
-Über das Darstellungssymbol oben rechts lässt sich zwischen **Automatisch**, **Hell** und **Dunkel** wechseln. Die Wetterlage verändert die Farbstimmung unabhängig davon; Nachtwerte zeigen passende Symbole und bei klarem Himmel Sterne. `theme.js` lädt die gespeicherte Darstellung vor dem Stylesheet. Die Effekte bleiben auf den aktuellen Wetterbereich begrenzt und respektieren `prefers-reduced-motion`.
+![Jweather home — a warm paper background, a sun on the horizon, and a place search](docs/screenshots/home.png)
 
-## Lokal starten
+A forecast for wherever you are. Search a city or use your location, then see the weather for today and the next five days.
 
-Ein einfacher statischer Webserver reicht:
+The interface pairs warm neutrals with amber sunlight and a little orange at sunset. Light and dark appearances follow your system or your choice. Colours and small, quiet animations respond to the weather.
+
+<table>
+<tr><th>Light</th><th>Dark</th></tr>
+<tr>
+<td><img src="docs/screenshots/forecast-light.png" alt="Lisbon forecast in light mode, with an orange sunset accent" width="100%"></td>
+<td><img src="docs/screenshots/forecast-dark.png" alt="The same forecast in dark mode" width="100%"></td>
+</tr>
+</table>
+
+<details>
+<summary>On a smaller screen</summary>
+<br>
+<img src="docs/screenshots/forecast-mobile.png" alt="The mobile forecast with scrollable hourly conditions and a five-day list" width="320">
+</details>
+
+*Screenshots show the actual interface with example forecast data.*
+
+## The forecast
+
+- Current temperature, feels-like temperature, humidity and wind
+- Eight hours ahead, five days ahead, and a closer look at each day
+- Sunrise, sunset, rain probability and precipitation
+- Celsius or Fahrenheit, remembered places, and light or dark appearance
+- Keyboard navigation, mobile layouts and reduced-motion support
+
+Everything runs in the browser. No API key, framework or build step. Location access is requested only when you choose **Use my location**. Preferences and recent places stay in your browser.
+
+## Development
+
+Serve the repository with any static web server:
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Öffne anschließend die Startseite auf Port 8000. Für die Standortabfrage ist außerhalb von localhost HTTPS erforderlich.
-
-Alternativ mit Node.js 20 oder neuer:
+Or, with Node.js 20 or newer:
 
 ```sh
 npm run dev
 ```
 
-Dieser Entwicklungsserver liefert die Seite auf Port 8080 unter `/Jweather/` aus. Er benötigt keine npm-Installation. Der Projektpfad entspricht einer typischen GitHub-Pages-Adresse.
+The Node server uses port 8080 and the `/Jweather/` project path. It does not require installing npm dependencies. Geolocation needs HTTPS, except on localhost.
 
-## GitHub Pages
-
-In den Repository-Einstellungen unter **Pages → Build and deployment**:
-
-1. **Deploy from a branch** wählen.
-2. Den gewünschten Branch und **/ (root)** auswählen.
-3. Speichern.
-
-Es gibt nichts zu kompilieren. `index.html` ist die Startseite; Stylesheets, Skripte, Schriften, Favicon und Navigation verwenden relative Pfade. Die Seite funktioniert sowohl auf einer eigenen Domain als auch unter einem Projektpfad wie `https://jayden-ff.github.io/Jweather/`. `.nojekyll` ermöglicht die direkte Auslieferung der statischen Dateien.
-
-Wetterseiten sind direkt verlinkbar:
-
-```text
-weather.html?lat=52.52&lon=13.405&name=Berlin&country=Deutschland
-```
-
-Bestehende Links mit `lat`, `lon` und `name` funktionieren weiter. Ungültige oder fehlende Koordinaten führen zu einer verständlichen Meldung mit Link zur Ortssuche.
-
-## Browserprüfungen
-
-Die einzigen npm-Abhängigkeiten sind Entwicklungswerkzeuge für die Tests:
+## Checks and screenshots
 
 ```sh
 npm ci
 npx playwright install chromium
 npm test
+npm run screenshots
 ```
 
-Mit einem bereits installierten Chromium lässt sich der Download vermeiden:
+To use an existing Chromium installation:
 
 ```sh
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm test
+PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run screenshots
 ```
 
-Die Tests starten ihren statischen Server selbst. Sie prüfen den kompletten Such- und Wetterablauf, Desktop- und Mobilansichten (320–1440 px), Projektpfade, Einheitenwechsel, Dialoge, Netzwerkfehler, ungültige Daten, verspätete Suchantworten, Standortfreigaben und deaktivierten lokalen Speicher. Außerdem prüfen sie die Systemdarstellung, gespeicherte Theme-Wahl, Synchronisierung zwischen Tabs, Wettereffekte, reduzierte Animationen und die tatsächliche Klickbarkeit der Suchvorschläge über der Illustration. Die API-Antworten sind für wiederholbare Tests kontrolliert; die Tests benötigen keinen Zugang zu Open-Meteo.
+Browser tests cover search, forecasts, units, themes, weather effects, mobile layouts, dialogs and connection failures. They also check that search results stay clickable above the illustration. Tests and screenshots use repeatable example data, so they work without access to Open-Meteo.
 
-## Daten und Grenzen
+## GitHub Pages
 
-Vorhersagen und Ortsdaten stammen von [Open-Meteo](https://open-meteo.com/). Die Anwendung verwendet aktuelle Werte aus `current`, stündliche Werte ab der aktuellen Stunde und Tageswerte in der Zeitzone des gewählten Orts. Die Regenwahrscheinlichkeit im Tagesüberblick ist der Tageshöchstwert. Fehlende optionale Messwerte erscheinen als `—`. Die Ortszeit wird laufend aktualisiert; neue Wetterdaten werden beim Aufrufen oder Neuladen der Seite angefordert.
+In **Settings → Pages**, choose **Deploy from a branch**, select your branch and **/ (root)**, then save. No build is needed. Relative asset paths support both project sites and custom domains; `.nojekyll` keeps deployment static.
 
-Die kostenlosen Open-Meteo-Endpunkte unterliegen den [Nutzungsbedingungen](https://open-meteo.com/en/terms) des Anbieters. Bei fehlender Verbindung oder einer Anbieterbegrenzung bleibt die Seite bedienbar und bietet einen erneuten Versuch.
+Forecasts can be linked directly:
 
-## Lizenz
+```text
+weather.html?lat=38.7223&lon=-9.1393&name=Lisbon&country=Portugal
+```
 
-Apache 2.0, siehe [LICENSE](LICENSE). Die Schriftlizenzen liegen separat unter `assets/fonts/`.
+Existing links with `lat`, `lon` and `name` continue to work.
+
+## Data and credits
+
+Weather and place search: [Open-Meteo](https://open-meteo.com/), subject to its [terms](https://open-meteo.com/en/terms). Times use the selected place's timezone. Daily rain probability is the day's maximum; missing optional readings appear as `—`. Weather updates when you open or reload the forecast. Sunrise and sunset accents use the forecast's local time.
+
+Type: **DM Sans** and **Instrument Serif**, served locally under the [SIL Open Font License](assets/fonts/). Application: [Apache 2.0](LICENSE).

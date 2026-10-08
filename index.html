@@ -1,82 +1,82 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3f0e9">
-    <meta name="description" content="Das Wetter, auf das Wesentliche reduziert. Aktuelle Bedingungen und die nächsten fünf Tage – für deinen Ort.">
-    <title>Jweather — Wetter. Ganz in Ruhe.</title>
+    <meta name="description" content="Current weather, the hours ahead, and a five-day forecast for wherever you are.">
+    <title>Jweather — Weather at a glance.</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
-    <script src="theme.js?v=20261008.2"></script>
-    <link rel="stylesheet" href="weather.css?v=20261008.2">
-    <script src="weather.js?v=20261008.2" defer></script>
+    <script src="theme.js?v=20261008.3"></script>
+    <link rel="stylesheet" href="weather.css?v=20261008.3">
+    <script src="weather.js?v=20261008.3" defer></script>
 </head>
 <body data-page="home">
-    <a class="skip-link" href="#main">Zum Inhalt</a>
+    <a class="skip-link" href="#main">Skip to content</a>
     <div class="site-shell">
         <header class="site-header reveal">
-            <a class="wordmark" href="index.html" aria-label="Jweather Startseite">
+            <a class="wordmark" href="index.html" aria-label="Jweather home">
                 <svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6.1 6.1l2.8 2.8m14.2 14.2 2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></svg>
                 jweather<span class="wordmark-dot">.</span>
             </a>
-            <span class="header-note">Ein guter Tag beginnt mit einem Blick nach draußen.</span>
+            <span class="header-note">A quick look before you head out.</span>
             <div class="header-actions"><time class="header-date" id="today-date"></time>
                 <details class="theme-picker" id="theme-picker">
-                    <summary aria-label="Darstellung ändern" title="Darstellung ändern"><svg class="theme-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/></svg></summary>
-                    <div class="theme-options" role="group" aria-label="Darstellung">
-                        <span class="theme-menu-label">Darstellung</span>
-                        <button type="button" data-theme-choice="auto" aria-pressed="true">Automatisch <span>System</span></button>
-                        <button type="button" data-theme-choice="light" aria-pressed="false">Hell <span aria-hidden="true">☼</span></button>
-                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dunkel <span aria-hidden="true">☾</span></button>
+                    <summary aria-label="Change appearance" title="Change appearance"><svg class="theme-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/></svg></summary>
+                    <div class="theme-options" role="group" aria-label="Appearance">
+                        <span class="theme-menu-label">Appearance</span>
+                        <button type="button" data-theme-choice="auto" aria-pressed="true">Automatic <span>System</span></button>
+                        <button type="button" data-theme-choice="light" aria-pressed="false">Light <span aria-hidden="true">☼</span></button>
+                        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark <span aria-hidden="true">☾</span></button>
                     </div>
                 </details>
             </div>
         </header>
         <main id="main" class="home-main">
             <section class="home-intro reveal" style="--delay:80ms" aria-labelledby="home-title">
-                <p class="eyebrow"><span class="small-line"></span> Das Wetter. Das Wesentliche.</p>
-                <h1 id="home-title">Wetter.<br><em>Ganz in Ruhe.</em></h1>
-                <p class="intro-copy">Für große Pläne und kleine Spaziergänge.<br>Finde heraus, was der Himmel heute vorhat.</p>
+                <p class="eyebrow"><span class="small-line"></span> Your daily forecast</p>
+                <h1 id="home-title">Weather.<br><em>At a glance.</em></h1>
+                <p class="intro-copy">For the everyday and the days away.<br>See what the sky has in store.</p>
                 <div class="search-area" data-search>
                     <div class="search-control">
                         <form class="search-form" role="search" autocomplete="off">
-                            <label class="sr-only" for="location-search">Stadt oder Ort suchen</label>
+                            <label class="sr-only" for="location-search">Search for a city or place</label>
                             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>
-                            <input id="location-search" name="location" type="search" placeholder="Welcher Ort darf es sein?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">
-                            <button class="search-submit" type="submit" aria-label="Ort suchen"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
+                            <input id="location-search" name="location" type="search" placeholder="Where are we heading?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">
+                            <button class="search-submit" type="submit" aria-label="Search places"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
                         </form>
-                        <ul class="search-results" id="search-results" role="listbox" aria-label="Gefundene Orte" hidden></ul>
+                        <ul class="search-results" id="search-results" role="listbox" aria-label="Matching places" hidden></ul>
                     </div>
                     <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
                 </div>
-                <button class="location-button" id="use-location" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg> Meinen Standort verwenden <span aria-hidden="true">↗</span></button>
+                <button class="location-button" id="use-location" type="button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg> Use my location <span aria-hidden="true">↗</span></button>
             </section>
-            <figure class="weather-art reveal" style="--delay:160ms" aria-label="Abstrakte Illustration einer Sonne über dem Horizont">
-                <div class="art-topline"><span>Ein bisschen Perspektive.</span><span aria-hidden="true">01 / 01</span></div>
+            <figure class="weather-art reveal" style="--delay:160ms" aria-label="An abstract sun above the horizon">
+                <div class="art-topline"><span>A little perspective.</span><span aria-hidden="true">01 / 01</span></div>
                 <svg class="horizon-art" viewBox="0 0 520 490" fill="none" aria-hidden="true">
-                    <defs><clipPath id="above-horizon"><path d="M0 0h520v320H0z"/></clipPath></defs>
+                    <defs><linearGradient id="sun-color" x1="0" y1="0" x2="0" y2="1"><stop class="sun-gradient-top" offset="0"/><stop class="sun-gradient-bottom" offset="1"/></linearGradient><clipPath id="above-horizon"><path d="M0 0h520v320H0z"/></clipPath></defs>
                     <g class="art-orbits"><ellipse cx="260" cy="247" rx="222" ry="183"/><ellipse cx="260" cy="247" rx="179" ry="183"/><ellipse cx="260" cy="247" rx="110" ry="183"/><path d="M38 247h444M67 158h386M69 335h382"/></g>
                     <g clip-path="url(#above-horizon)"><circle class="art-sun" cx="260" cy="250" r="99"/></g>
                     <path class="art-horizon" d="M20 321h480"/>
                     <g class="art-waves"><path d="M73 343h374M92 362h336M119 381h282M156 400h208"/></g>
                     <path class="art-cross" d="M260 37v16m-8-8h16M18 247h16m-8-8v16M486 247h16m-8-8v16"/>
                 </svg>
-                <figcaption><span>Weniger Rauschen.<br><strong>Mehr Aussicht.</strong></span><span class="art-coordinate" aria-hidden="true">N 52° 31′<br>E 13° 24′</span></figcaption>
+                <figcaption><span>A view of the sky.<br><strong>A moment outside.</strong></span><span class="art-coordinate" aria-hidden="true">N 38° 43′<br>W 09° 08′</span></figcaption>
             </figure>
             <section class="places-section reveal" style="--delay:240ms" aria-labelledby="places-title">
-                <div class="section-heading"><h2 id="places-title">Ein Ort zum Anfangen</h2><span>Oder irgendwo ganz anders.</span></div>
+                <div class="section-heading"><h2 id="places-title">Somewhere to start</h2><span>Or anywhere else.</span></div>
                 <div class="place-links">
-                    <a href="weather.html?lat=52.52&amp;lon=13.405&amp;name=Berlin&amp;country=Deutschland"><span class="place-number">01</span><span>Berlin</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
-                    <a href="weather.html?lat=53.5511&amp;lon=9.9937&amp;name=Hamburg&amp;country=Deutschland"><span class="place-number">02</span><span>Hamburg</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
-                    <a href="weather.html?lat=48.1351&amp;lon=11.582&amp;name=M%C3%BCnchen&amp;country=Deutschland"><span class="place-number">03</span><span>München</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                    <a href="weather.html?lat=38.7223&amp;lon=-9.1393&amp;name=Lisbon&amp;country=Portugal"><span class="place-number">01</span><span>Lisbon</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                    <a href="weather.html?lat=40.7128&amp;lon=-74.006&amp;name=New+York&amp;country=United+States"><span class="place-number">02</span><span>New York</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+                    <a href="weather.html?lat=35.6762&amp;lon=139.6503&amp;name=Tokyo&amp;country=Japan"><span class="place-number">03</span><span>Tokyo</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
                 </div>
             </section>
-            <section class="recent-section" id="recent-places" aria-labelledby="recent-title" hidden><h2 class="eyebrow" id="recent-title">Zuletzt angesehen</h2><div id="recent-links" class="recent-links"></div></section>
+            <section class="recent-section" id="recent-places" aria-labelledby="recent-title" hidden><h2 class="eyebrow" id="recent-title">Recently viewed</h2><div id="recent-links" class="recent-links"></div></section>
         </main>
-        <footer class="site-footer"><span>Für jeden Himmel.</span><span>Wetterdaten von <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
+        <footer class="site-footer"><span>Whatever the sky brings.</span><span>Weather by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
     </div>
-    <noscript><p class="noscript-note">Bitte aktiviere JavaScript, um Orte zu suchen und das Wetter abzurufen.</p></noscript>
+    <noscript><p class="noscript-note">Please enable JavaScript to search for places and get the forecast.</p></noscript>
 </body>
 </html>
