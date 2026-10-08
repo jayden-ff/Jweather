@@ -37,7 +37,10 @@ try {
             temperature_2m_min: [17, 17, 16, 15, 16, 17], precipitation_probability_max: [5, 5, 10, 20, 55, 5],
             sunrise: fixture.daily.time.map(d => `${d}T07:30`), sunset: fixture.daily.time.map(d => `${d}T18:45`) },
         hourly: { time: hours, temperature_2m: hours.map((_, i) => Math.round(19 + 3 * Math.cos((i % 24 - 15) * Math.PI / 12))),
-            weather_code: Array(48).fill(0), precipitation_probability: Array(48).fill(5) }
+            apparent_temperature: hours.map((_, i) => Math.round(19 + 3 * Math.cos((i % 24 - 15) * Math.PI / 12))),
+            weather_code: Array(48).fill(0), precipitation_probability: Array(48).fill(5), precipitation: Array(48).fill(0),
+            wind_speed_10m: Array(48).fill(9), wind_gusts_10m: Array(48).fill(15),
+            uv_index: Array(48).fill(2), cloud_cover: Array(48).fill(25) }
     };
     await page.route('https://api.open-meteo.com/**', route => route.fulfill({ json: preview }));
     await page.goto(base);
@@ -47,11 +50,17 @@ try {
     await page.locator('#weather-content').waitFor();
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: fileURLToPath(new URL('forecast-light.png', output)), fullPage: true });
+    await page.locator('#outside-section').screenshot({ path: fileURLToPath(new URL('time-outside.png', output)) });
+    await page.getByRole('button', { name: 'Add to calendar', exact: true }).click();
+    await page.locator('#calendar-dialog').screenshot({ path: fileURLToPath(new URL('calendar.png', output)) });
+    await page.getByRole('button', { name: 'Close calendar' }).click();
+    await page.evaluate(() => { document.activeElement.blur(); window.scrollTo(0, 0); });
     await page.evaluate(() => window.JweatherTheme.setPreference('dark'));
     await page.screenshot({ path: fileURLToPath(new URL('forecast-dark.png', output)), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: fileURLToPath(new URL('forecast-mobile.png', output)), fullPage: true });
-    console.log('Saved four interface screenshots to docs/screenshots/ (example forecast data).');
+    console.log('Saved six interface screenshots to docs/screenshots/ (example forecast data).');
 } finally {
     await browser?.close();
     server?.kill();

@@ -1,0 +1,144 @@
+.outside-section { --moment-accent: #a66535; --moment-wash: #b7783718; margin-top: 46px; }
+:root[data-theme="dark"] .outside-section { --moment-accent: #e9b578; --moment-wash: #e9b57818; }
+.outside-section[data-activity="run"] { --moment-accent: #9a731c; --moment-wash: #c79b3818; }
+.outside-section[data-activity="cycle"] { --moment-accent: #627466; --moment-wash: #738b7318; }
+.outside-section[data-activity="sunset"] { --moment-accent: #b8633d; --moment-wash: #d67c491f; }
+:root[data-theme="dark"] .outside-section[data-activity="run"] { --moment-accent: #e7bd60; }
+:root[data-theme="dark"] .outside-section[data-activity="cycle"] { --moment-accent: #b0c4ac; }
+:root[data-theme="dark"] .outside-section[data-activity="sunset"] { --moment-accent: #ed9a68; }
+.outside-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 26px; }
+.outside-heading .eyebrow { color: var(--muted); font-size: 9px; }
+.outside-heading h2 { font: 400 42px/1.15 var(--serif); letter-spacing: -.7px; margin: 10px 0 6px; }
+.outside-intro { color: var(--muted); font-size: 12px; }
+.outside-day, .preference-fields label { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 10px; }
+.outside-section select { font: 400 12px/1.4 var(--sans); color: var(--ink); background: var(--paper); padding: 11px 32px 11px 12px; min-height: 44px; border: 1px solid var(--line); border-radius: 0; cursor: pointer; max-width: 100%; }
+.outside-section select:focus-visible { outline: 2px solid var(--moment-accent); outline-offset: 3px; }
+.activity-switch { position: relative; display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 4px; border: 1px solid var(--line); }
+.activity-switch button { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 22px; background: transparent; font-size: 12px; min-height: 44px; transition: color .3s, transform .3s var(--ease); }
+.activity-switch button svg { width: 20px; height: 20px; flex-shrink: 0; }
+.activity-switch button[aria-pressed="true"] { color: var(--paper); }
+.activity-switch button:active { transform: scale(.95); }
+.activity-pill { position: absolute; top: 4px; bottom: 4px; left: var(--pill-left, 4px); width: var(--pill-width, 100px); background: var(--ink); pointer-events: none; transition: left .45s var(--ease), width .45s var(--ease), background .3s; }
+.outside-preferences { margin: 8px 0 20px; }
+.outside-preferences summary { display: inline-flex; align-items: center; gap: 16px; padding: 10px 0; min-height: 40px; font-size: 11px; color: var(--muted); cursor: pointer; list-style: none; }
+.outside-preferences summary::-webkit-details-marker { display: none; }
+.outside-preferences summary span { transition: transform .3s var(--ease); }
+.outside-preferences[open] summary span { transform: rotate(45deg); }
+.preference-fields { display: flex; align-items: flex-end; gap: 20px; padding: 12px 0 10px; animation: reveal .3s var(--ease); }
+.preference-fields > p { color: var(--muted); font-size: 10px; max-width: 220px; margin: 0 0 10px auto; }
+.outside-card { display: grid; grid-template-columns: 1.15fr 1fr; gap: 36px; padding: 32px; border: 1px solid var(--line); background: var(--white); overflow: hidden; min-height: 340px; transition: background .4s, border-color .4s; }
+.moment-copy { min-width: 0; align-self: center; }
+.moment-badge { color: var(--moment-accent); font-size: 10px; letter-spacing: .2px; margin-bottom: 15px; transition: color .4s; }
+.moment-title { font: 400 26px/1.3 var(--serif); }
+.moment-time { display: flex; align-items: baseline; gap: 12px; font: 400 clamp(40px, 4.5vw, 64px)/1.2 var(--serif); font-variant-numeric: tabular-nums; letter-spacing: -1px; margin: 8px 0 16px; white-space: nowrap; }
+.moment-dash { color: var(--moment-accent); font-size: .65em; }
+.moment-reasons { display: flex; flex-wrap: wrap; gap: 8px 15px; list-style: none; padding: 0; margin: 0; font-size: 11px; }
+.moment-reasons li + li::before { content: "·"; color: var(--moment-accent); margin-right: 15px; }
+.moment-local { font-size: 10px; color: var(--muted); margin-top: 8px; }
+.moment-add { display: inline-flex; gap: 32px; align-items: center; justify-content: space-between; margin-top: 23px; padding: 13px 18px; min-height: 44px; font-size: 12px; background: var(--ink); color: var(--paper); transition: transform .3s var(--ease), background .3s; }
+.moment-add:hover { background: var(--button-hover); transform: translateY(-2px); }
+.moment-add span { transition: transform .3s var(--ease); }
+.moment-add:hover span { transform: translate(2px, -2px); }
+.moment-add:active { transform: scale(.97); }
+.moment-visual { min-width: 0; align-self: center; }
+.moment-art { height: 95px; padding: 0 40px; color: var(--moment-accent); overflow: hidden; margin-bottom: 12px; }
+.moment-art svg { width: 100%; height: 100%; stroke: currentColor; stroke-width: 1.1; overflow: visible; }
+.moment-ground { stroke: var(--line); }
+.moment-orbit { opacity: .4; stroke-dasharray: 3 6; animation: moment-orbit 32s linear infinite; }
+.moment-orb { fill: var(--moment-wash); animation: moment-float 7s ease-in-out infinite; }
+.moment-rays { transform-origin: 170px 18px; opacity: .65; animation: orbit 90s linear infinite; }
+.outside-section[data-activity="sunset"] .moment-orb { fill: var(--moment-accent); fill-opacity: .3; }
+.moment-timeline { display: grid; grid-template-columns: repeat(18, 1fr); gap: 5px; align-items: end; height: 64px; position: relative; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.timeline-bar { display: block; height: max(4px, var(--bar-height)); background: var(--line); transform-origin: bottom; animation: moment-bar .6s var(--ease) both; animation-delay: calc(var(--bar-order) * 18ms); position: relative; opacity: .75; }
+.timeline-bar.good { background: var(--moment-accent); opacity: .65; }
+.timeline-bar.missing { opacity: .3; }
+.timeline-selection { position: absolute; top: -5px; bottom: -5px; border: 1px solid var(--moment-accent); background: var(--moment-wash); transition: left .5s var(--ease), width .5s var(--ease); }
+.timeline-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; padding-top: 9px; }
+.timeline-caption { color: var(--muted); font-size: 9px; margin-top: 9px; line-height: 1.6; }
+.moment-alternatives { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+.moment-alternative { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px; min-width: 0; padding: 10px; background: transparent; border: 1px solid var(--line); color: var(--muted); transition: border-color .3s, background .3s, transform .3s; text-align: left; }
+.moment-alternative[aria-pressed="true"] { border-color: var(--moment-accent); background: var(--moment-wash); color: var(--ink); }
+.moment-alternative:hover { transform: translateY(-2px); border-color: var(--moment-accent); }
+.alternative-label { font-size: 8px; letter-spacing: .15px; }
+.alternative-time { font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.alternative-day { font-size: 9px; }
+.moment-empty { font-size: 12px; color: var(--muted); max-width: 360px; margin-top: 16px; }
+.moment-change { display: inline-block; background: transparent; color: var(--ink); border-bottom: 1px solid var(--line); padding: 12px 0; min-height: 44px; margin-top: 10px; font-size: 12px; text-align: left; }
+.outside-card:has(.moment-visual[hidden]) { grid-template-columns: 1fr; min-height: 250px; }
+.moment-method { margin-top: 14px; color: var(--muted); font-size: 10px; max-width: 750px; }
+.moment-method summary { padding: 10px 0; cursor: pointer; }
+.moment-method p { line-height: 1.8; margin: 3px 0 10px; }
+.calendar-dialog { width: min(490px, calc(100% - 32px)); }
+.calendar-preview { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 24px 0 16px; padding: 17px 0; font-size: 12px; }
+.calendar-preview strong { font-weight: 500; overflow-wrap: anywhere; }
+.calendar-preview span { font-size: 10px; color: var(--muted); }
+.calendar-explainer { color: var(--muted); font-size: 11px; line-height: 1.8; margin-bottom: 14px; }
+.calendar-providers { display: flex; flex-direction: column; gap: 8px; }
+.calendar-provider { display: flex; align-items: center; gap: 13px; width: 100%; min-height: 62px; padding: 11px 13px; border: 1px solid var(--line); background: transparent; text-align: left; transition: background .2s, transform .2s, border-color .2s; }
+.calendar-provider:hover { background: var(--panel); border-color: var(--ink); transform: translateX(2px); }
+.calendar-provider strong { display: block; font-weight: 500; font-size: 12px; }
+.calendar-provider small { display: block; color: var(--muted); font-size: 9px; margin-top: 2px; }
+.calendar-provider-mark { display: grid; place-items: center; height: 30px; width: 30px; border: 1px solid var(--line); font: 400 18px/1 var(--serif); flex-shrink: 0; color: var(--accent-ink); }
+.calendar-arrow { margin-left: auto; font-size: 16px; }
+.calendar-status { font-size: 11px; color: var(--muted); margin-top: 14px; min-height: 18px; }
+.calendar-status a { margin-left: 12px; }
+.calendar-confirmation { color: var(--ink); }
+.calendar-disconnect { background: transparent; padding: 10px 0; font-size: 10px; color: var(--muted); margin-top: 10px; min-height: 44px; }
+@keyframes moment-bar { from { transform: scaleY(.05); opacity: 0; } to { transform: scaleY(1); } }
+@keyframes moment-float { 0%,100% { transform: translateY(3px); } 50% { transform: translateY(-3px); } }
+@keyframes moment-orbit { to { stroke-dashoffset: -180; } }
+@media (max-width: 1100px) {
+    .outside-card { gap: 28px; padding: 26px; grid-template-columns: 1.1fr 1fr; }
+    .moment-time { font-size: 48px; gap: 9px; }
+    .moment-alternative { padding: 8px 6px; }
+    .alternative-time { font-size: 10px; }
+}
+@media (max-width: 800px) {
+    .outside-card { grid-template-columns: 1fr; gap: 30px; }
+    .moment-time { font-size: 62px; }
+    .moment-art { height: 75px; padding: 0 15%; }
+    .moment-alternative { padding: 12px; }
+    .alternative-time { font-size: 12px; }
+    .preference-fields { flex-wrap: wrap; }
+    .preference-fields > p { max-width: none; width: 100%; margin: 0; }
+}
+@media (max-width: 600px) {
+    .outside-section { margin-top: 38px; }
+    .outside-heading { display: block; margin-bottom: 18px; }
+    .outside-heading h2 { font-size: 36px; }
+    .outside-intro { font-size: 11px; }
+    .outside-day { flex-direction: row; justify-content: space-between; align-items: center; margin-top: 20px; }
+    .outside-day select { width: 160px; }
+    .activity-switch { display: grid; width: 100%; }
+    .activity-switch button { padding: 10px 5px; gap: 5px; font-size: 11px; }
+    .activity-switch button svg { width: 16px; height: 16px; }
+    .outside-card { padding: 22px; gap: 22px; }
+    .moment-title { font-size: 25px; }
+    .moment-time { font-size: clamp(38px, 12.3vw, 54px); gap: 8px; letter-spacing: -.5px; }
+    .moment-badge { font-size: 9px; }
+    .moment-reasons { font-size: 10px; gap: 7px 10px; }
+    .moment-reasons li + li::before { margin-right: 10px; }
+    .moment-add { width: 100%; justify-content: center; gap: 24px; margin-top: 20px; }
+    .moment-art { height: 65px; }
+    .moment-timeline { height: 55px; gap: 4px; }
+    .moment-alternatives { gap: 6px; }
+    .moment-alternative { padding: 9px 6px; }
+    .alternative-time { font-size: 10px; }
+    .alternative-label { font-size: 7px; }
+    .alternative-day { font-size: 8px; }
+    .preference-fields { gap: 14px; }
+    .preference-fields label { flex: 1; min-width: 105px; }
+    .preference-fields select { padding-left: 8px; font-size: 11px; }
+    .calendar-dialog { padding: 24px; }
+    .calendar-dialog .dialog-topline .eyebrow { font-size: 8px; letter-spacing: 1px; }
+}
+@media (max-width: 360px) {
+    .outside-card { padding: 17px; }
+    .activity-switch button { font-size: 10px; gap: 4px; }
+    .activity-switch button svg { width: 14px; height: 14px; }
+    .moment-time { font-size: 38px; }
+    .moment-reasons li + li::before { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .outside-section *, .calendar-dialog * { animation: none !important; transition: none !important; }
+}

@@ -2,10 +2,11 @@
   "name": "jweather",
   "version": "2.0.0",
   "private": true,
+  "type": "module",
   "description": "Current conditions, the hours ahead, and a five-day forecast.",
   "scripts": {
     "dev": "node tests/server.mjs",
-    "test": "playwright test",
+    "test": "node --test tests/activities.test.mjs && playwright test",
     "test:ui": "playwright test --ui",
     "screenshots": "node tests/screenshots.mjs"
   },

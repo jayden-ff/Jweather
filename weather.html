@@ -10,8 +10,11 @@
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <script src="theme.js?v=20261008.3"></script>
-    <link rel="stylesheet" href="weather.css?v=20261008.3">
-    <script src="weather.js?v=20261008.3" defer></script>
+    <link rel="stylesheet" href="weather.css?v=20261008.4">
+    <link rel="stylesheet" href="activities.css?v=20261008.4">
+    <script src="calendar-config.js?v=20261008.4" defer></script>
+    <script type="module" src="activities.js?v=20261008.4"></script>
+    <script src="weather.js?v=20261008.4" defer></script>
 </head>
 <body data-page="weather">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -61,6 +64,34 @@
                     </div>
                     <div class="current-details"><h2 class="eyebrow">The details</h2><dl class="detail-list"><div><dt>Feels like</dt><dd id="feels-like"></dd></div><div><dt>Humidity</dt><dd id="humidity"></dd></div><div><dt>Wind <span class="wind-direction" id="wind-direction"></span></dt><dd id="wind-speed"></dd></div><div><dt>Chance of rain</dt><dd id="rain-chance"></dd></div></dl><div class="sun-times"><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3-3 3 3M3 9l2 2m14 0 2-2"/></svg><span>Sunrise</span><strong id="sunrise"></strong></div><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3 3 3-3M3 9l2 2m14 0 2-2"/></svg><span>Sunset</span><strong id="sunset"></strong></div></div></div>
                 </section>
+                <section class="outside-section reveal" id="outside-section" style="--delay:120ms" aria-labelledby="outside-title" data-activity="walk">
+                    <div class="outside-heading"><div><p class="eyebrow"><span class="small-line"></span> Time outside</p><h2 id="outside-title">A good time to go.</h2><p class="outside-intro">Choose your activity. Find a little room in the day.</p></div>
+                        <label class="outside-day">Find a moment<select id="outside-day"><option value="next">Next 3 days</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select></label>
+                    </div>
+                    <div class="activity-switch" role="group" aria-label="Outdoor activity">
+                        <span class="activity-pill" aria-hidden="true"></span>
+                        <button type="button" data-activity-choice="walk" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="14" cy="4" r="2"/><path d="m10 12 3-5 3 5 4 1M5 14l5-2 3 5-1 5m-2-10-3 9"/></svg>Walk</button>
+                        <button type="button" data-activity-choice="run" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="16" cy="4" r="2"/><path d="m8 9 4-2 4 5 4-2M12 7l-3 7 5 3-3 5m-2-8-3 4H2"/></svg>Run</button>
+                        <button type="button" data-activity-choice="cycle" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="16" r="4"/><circle cx="19" cy="16" r="4"/><path d="m5 16 5-8 5 8H5m5-8h6m-8-3h4m3 0h3l1 11"/></svg>Cycle</button>
+                        <button type="button" data-activity-choice="sunset" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 18h20M6 15a6 6 0 0 1 12 0M12 2v6m-3-3 3 3 3-3M3 9l2 2m14 0 2-2"/></svg>Sunset</button>
+                    </div>
+                    <details class="outside-preferences" id="outside-preferences"><summary>Make it yours <span aria-hidden="true">+</span></summary><div class="preference-fields">
+                        <label id="duration-field">Time to spare<select id="outside-duration"><option value="30">30 minutes</option><option value="60" selected>1 hour</option><option value="90">90 minutes</option></select></label>
+                        <label id="period-field">Time of day<select id="outside-period"><option value="any">Anytime</option><option value="morning">Morning · before 12:00</option><option value="afternoon">Afternoon · 12:00–17:00</option><option value="evening">Evening · after 17:00</option></select></label>
+                        <p>Your choices stay in this browser. Sunset moments last 45 minutes.</p>
+                    </div></details>
+                    <div class="outside-card" id="outside-card">
+                        <div class="moment-copy" id="moment-copy" aria-live="polite" aria-atomic="true"></div>
+                        <div class="moment-visual" id="moment-visual">
+                            <div class="moment-art" aria-hidden="true"><svg viewBox="0 0 340 110" fill="none"><path class="moment-orbit" d="M22 100C65-12 275-12 318 100"/><path class="moment-ground" d="M14 101h312"/><circle class="moment-orb" cx="170" cy="18" r="14"/><path class="moment-rays" d="M170 0v-5m0 46v5M148 18h-5m49 0h5m-42-15-4-4m34 34 4 4m-34-4-4 4m34-34 4-4"/></svg></div>
+                            <div class="moment-timeline" id="moment-timeline" aria-hidden="true"></div>
+                            <div class="timeline-labels" aria-hidden="true"><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+                            <p class="timeline-caption" id="timeline-caption">Taller bars, better conditions. Highlighted: your moment.</p>
+                            <div class="moment-alternatives" id="moment-alternatives" role="group" aria-label="Suggested time windows"></div>
+                        </div>
+                    </div>
+                    <details class="moment-method"><summary>How we find your moment</summary><p>We compare daylight, temperature, rain chance, wind and gusts across the whole activity. Suggestions allow up to 35% rain chance and avoid storms, freezing rain, strong winds and very high UV. Cycling uses a lower wind limit. Sunset suggestions also need some clear sky; colours are never guaranteed. These are forecast-based suggestions, so check conditions before you go.</p></details>
+                </section>
                 <section class="hourly-section reveal" style="--delay:140ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">The hours ahead</h2><span>All times are local.</span></div><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Hourly forecast, scroll horizontally"></div></section>
                 <section class="forecast-section reveal" style="--delay:200ms" aria-labelledby="forecast-title"><div class="section-heading"><h2 id="forecast-title">Looking ahead</h2><span>The next five days <span aria-hidden="true">↗</span></span></div><div class="forecast-list" id="forecast"></div><p class="forecast-hint">Choose a day for a closer look.</p></section>
             </div>
@@ -68,6 +99,14 @@
         <footer class="site-footer"><span>Whatever the sky brings.</span><span>Forecast by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
     </div>
     <dialog class="day-dialog" id="day-details" aria-labelledby="modal-date"><div class="dialog-topline"><span class="eyebrow">A closer look</span><button class="dialog-close" type="button" aria-label="Close details"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><h2 id="modal-date"></h2><p class="dialog-description" id="modal-description"></p><div class="dialog-weather"><div id="modal-icon" aria-hidden="true"></div><p id="modal-temperature"></p></div><dl class="dialog-details" id="modal-details"></dl><p class="dialog-note">Forecasts can change. A fresh look is always a good idea.</p></dialog>
+    <dialog class="day-dialog calendar-dialog" id="calendar-dialog" aria-labelledby="calendar-title">
+        <div class="dialog-topline"><span class="eyebrow">A little room in your day</span><button class="dialog-close" type="button" aria-label="Close calendar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+        <h2 id="calendar-title">Make it a plan.</h2><div class="calendar-preview" id="calendar-preview"></div>
+        <p class="calendar-explainer" id="calendar-explainer">The details are ready. Choose your calendar, then save the event there.</p>
+        <div class="calendar-providers" id="calendar-providers"></div>
+        <p class="calendar-status" id="calendar-status" role="status" aria-live="polite"></p>
+        <button type="button" class="text-link calendar-disconnect" id="calendar-disconnect" hidden>Disconnect calendars here</button>
+    </dialog>
     <noscript><p class="noscript-note">Please enable JavaScript to view the forecast.</p></noscript>
 </body>
 </html>

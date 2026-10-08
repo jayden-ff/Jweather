@@ -13,5 +13,8 @@ export const fixture = {
         wind_speed_10m_max: [24, 12, 17, 20, 30, 10], uv_index_max: [2, 3, 2, 1, 2, 1],
         sunrise: dates.map(d => `${d}T07:15`), sunset: dates.map(d => `${d}T18:30`) },
     hourly: { time: Array.from({ length: 24 }, (_, i) => `2026-10-08T${String(i).padStart(2, '0')}:00`),
-        temperature_2m: Array(24).fill(14), weather_code: Array(24).fill(0), precipitation_probability: Array(24).fill(15) }
+        temperature_2m: Array(24).fill(14), apparent_temperature: Array(24).fill(14),
+        weather_code: Array(24).fill(0), precipitation_probability: Array(24).fill(15),
+        precipitation: Array(24).fill(0), wind_speed_10m: Array(24).fill(12), wind_gusts_10m: Array(24).fill(18),
+        uv_index: Array(24).fill(2), cloud_cover: Array(24).fill(25) }
 };
