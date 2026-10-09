@@ -1,5 +1,16 @@
-import { el, button, makeDialog } from './ui.js?v=20261008.5';
-import { forecastURL } from './forecast-api.js?v=20261008.5';
+import { el, button, makeDialog } from './ui.js?v=20261009.1';
+import { forecastURL } from './forecast-api.js?v=20261009.1';
+
+// Keep dialogs inside the visible area when a phone's keyboard opens.
+function syncViewport() {
+    const viewport = window.visualViewport;
+    document.documentElement.style.setProperty('--available-height', (viewport?.height || innerHeight) + 'px');
+    document.documentElement.style.setProperty('--viewport-top', (viewport?.offsetTop || 0) + 'px');
+}
+syncViewport();
+window.visualViewport?.addEventListener('resize', syncViewport, { passive: true });
+window.visualViewport?.addEventListener('scroll', syncViewport, { passive: true });
+window.addEventListener('resize', syncViewport, { passive: true });
 
 let installPrompt, installer;
 const controls = [...document.querySelectorAll('[data-install-app]')];

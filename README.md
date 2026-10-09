@@ -10,7 +10,7 @@ Weather at a glance. A little time outside.
 
 ![Jweather home — a warm paper background, a sun on the horizon, and a place search](docs/screenshots/home.png)
 
-A forecast for wherever you are. Search a city or use your location, then find a good moment for a walk, a run, a ride or the last light of the day.
+A forecast for wherever you are, with a good reason to step outside. Find a city, choose a walk, run, ride or sunset, and turn a suitable weather window into a plan.
 
 The interface pairs warm neutrals with amber sunlight and a little orange at sunset. Light and dark appearances follow your system or your choice. Colours and small, quiet animations respond to the weather.
 
@@ -28,7 +28,7 @@ Optional Google and Microsoft connections can create the event directly after ac
 
 ## Make a day of it
 
-**My day** starts with your favorite places, preferred activity and free hours. A personal suggestion waits on the home page. Save a moment and find it under **My plans**; Jweather checks its weather when you return. If conditions change, review a better time before moving the plan. A connected calendar can update its linked event after your confirmation.
+**My day** starts with your favorite places, preferred activity and free hours. A personal suggestion waits on the home page. Save a moment and find it under **My plans**; Jweather checks its weather when you return. If conditions change, review a better time before moving the plan. A connected calendar can update its linked event after your confirmation. Removed a plan by mistake? **Undo** brings it back with its calendar link intact.
 
 ![My day — a favorite place and a personal afternoon recommendation](docs/screenshots/my-day.png)
 
@@ -36,7 +36,7 @@ Optional Google and Microsoft connections can create the event directly after ac
 
 ![Compare places — three destinations, their weather windows, and the best available fit](docs/screenshots/compare-places.png)
 
-**Explore** finds nearby parks and mapped out-and-back routes for walking, running or cycling. Choose a start or destination on the map, see the actual path and distance, then open directions or download the track as GPX. Walking and cycling use different routing profiles; running times use an estimated 9 km/h pace. A suitable weather window can be saved alongside your plans.
+**Find a route** takes your chosen activity straight into **Explore**. Find nearby parks and mapped out-and-back routes, choose a start or destination, then open directions or download the track as GPX. Walking and cycling use different routing profiles; running times use an estimated 9 km/h pace. Route cards show whether their moving time fits the selected weather window, and saving updates as you change your plans.
 
 ![Explore — an OpenStreetMap view of Berlin and two suggested routes](docs/screenshots/explore.png)
 
@@ -64,10 +64,25 @@ Places, preferences and saved plans stay on this device, in this browser. There 
 </tr>
 </table>
 
+## On your phone
+
+A small navigation bar keeps **Now**, **Time outside**, **Your day** and **Forecast** within reach. Temperature units sit beside the local time. Your personal day appears before the home page illustration once you have a favorite place.
+
+Controls have more room to tap, search fields avoid the automatic iPhone zoom, and dialogs fit the visible screen when the keyboard opens. Scroll past the map normally; use **Move map** when you want to drag it, or pinch to zoom. **Cancel selection** leaves a start or destination unchanged.
+
 <details>
-<summary>On a smaller screen</summary>
+<summary>A closer look at mobile</summary>
 <br>
-<img src="docs/screenshots/forecast-mobile.png" alt="The mobile forecast with scrollable hourly conditions and a five-day list" width="320">
+<table>
+<tr><th>The forecast</th><th>Your preferences</th></tr>
+<tr>
+<td valign="top"><img src="docs/screenshots/forecast-mobile.png" alt="Mobile dark forecast with section navigation, temperature units and an activity window" width="320"></td>
+<td valign="top"><img src="docs/screenshots/preferences-mobile.png" alt="Personal activity, free hours, weekdays and favorite places in a mobile dialog" width="320"></td>
+</tr>
+</table>
+
+[My day on mobile](docs/screenshots/home-mobile.png) · [Explore on mobile](docs/screenshots/explore-mobile.png)
+
 </details>
 
 *Screenshots show the actual interface with example forecast data.*
@@ -115,9 +130,9 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm test
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run screenshots
 ```
 
-Tests cover recommendations, personal hours, changed plans, comparison, sharing, route geometry, offline caching, search, units, themes and mobile layouts. Google consent and Microsoft's PKCE flow use simulated provider responses, including denial, invalid callback states and updates to linked events. Real account access requires configured app registrations. Interface screenshots use repeatable example forecasts; the map example uses saved OpenStreetMap route data.
+Tests cover recommendations, personal hours, changed plans, undo, comparison, sharing, route geometry, offline caching, search, units and themes. Mobile checks include small screens, landscape dialogs, long place names, section navigation and actual touch scrolling over the map. Google consent and Microsoft's PKCE flow use simulated provider responses, including denial, invalid callback states and updates to linked events. Real account access requires configured app registrations. Interface screenshots use repeatable example forecasts; the map example uses saved OpenStreetMap route data.
 
-To refresh the map screenshot as well, set `JWEATHER_SCREENSHOT_MAP=1`. This fetches only tiles displayed in the example view, with normal TLS verification. Other screenshots need no external service.
+To refresh both map screenshots as well, set `JWEATHER_SCREENSHOT_MAP=1`. This fetches only tiles displayed in the example views, with normal TLS verification. Other screenshots need no external service.
 
 ## GitHub Pages
 

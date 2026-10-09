@@ -1,5 +1,5 @@
-import { activities } from './activity-engine.js?v=20261008.5';
-import { placeURL } from './ui.js?v=20261008.5';
+import { activities } from './activity-engine.js?v=20261009.1';
+import { placeURL } from './ui.js?v=20261009.1';
 export function sharedPlanURL(plan) {
     return placeURL(plan.place, { activity: plan.activity, planAt: new Date(plan.start).toISOString(), minutes: String(plan.duration) });
 }

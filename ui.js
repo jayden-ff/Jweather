@@ -34,10 +34,15 @@ export function makeDialog(id, title, eyebrow = 'Jweather') {
         const r = dialog.getBoundingClientRect();
         if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close();
     });
-    let opener;
-    dialog.addEventListener('close', () => { if (opener?.isConnected) opener.focus({ preventScroll: true }); });
+    let opener, returnScope;
+    dialog.addEventListener('close', () => {
+        const target = opener?.isConnected ? opener : document.querySelector('dialog[open] .dialog-close')
+            || (returnScope?.isConnected && [...returnScope.querySelectorAll('button:not(:disabled), a[href], summary')]
+                .find(control => control.getClientRects().length));
+        target?.focus({ preventScroll: true });
+    });
     document.body.append(dialog);
-    return { dialog, content, open() { opener = document.activeElement; dialog.showModal(); } };
+    return { dialog, content, open() { opener = document.activeElement; returnScope = opener?.closest('section, main'); dialog.showModal(); } };
 }
 export function placeURL(place, extra = {}) {
     const url = new URL('weather.html', window.location.href);

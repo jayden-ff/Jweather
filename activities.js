@@ -1,7 +1,7 @@
-import { activities, findWindows, clockTime, dayLabel, localParts } from './activity-engine.js?v=20261008.5';
-import { makeEvent, calendarLinks, buildICS, configuration, prepareGoogle, addDirect, updateDirect, disconnectCalendars, hasConnections } from './calendar.js?v=20261008.5';
-import { getState, savePlan, linkCalendar, hasPersistentStorage, placeKey } from './personal-store.js?v=20261008.5';
-import { sharePlan } from './share-plan.js?v=20261008.5';
+import { activities, findWindows, clockTime, dayLabel, localParts } from './activity-engine.js?v=20261009.1';
+import { makeEvent, calendarLinks, buildICS, configuration, prepareGoogle, addDirect, updateDirect, disconnectCalendars, hasConnections } from './calendar.js?v=20261009.1';
+import { getState, savePlan, linkCalendar, hasPersistentStorage, placeKey } from './personal-store.js?v=20261009.1';
+import { sharePlan } from './share-plan.js?v=20261009.1';
 
 const $ = id => document.getElementById(id);
 const section = $('outside-section');
@@ -131,7 +131,7 @@ function choose(window) {
     const actions = el('div', 'moment-actions');
     const saved = getState().plans.some(plan => plan.activity === window.activity && plan.start === window.start && plan.end === window.end && placeKey(plan.place) === placeKey(forecast.place));
     const keep = el('button', 'moment-save', saved ? 'Saved ✓' : 'Save plan');
-    keep.type = 'button'; keep.disabled = saved;
+    keep.type = 'button'; keep.disabled = saved; keep.id = 'save-moment';
     const message = el('p', 'journey-status'); message.setAttribute('role', 'status');
     keep.addEventListener('click', () => {
         try {
@@ -150,6 +150,13 @@ function choose(window) {
         if (!message.querySelector('input')) message.textContent = outcome;
     });
     actions.append(add, keep, share);
+    if (['walk', 'run', 'cycle'].includes(window.activity)) {
+        const route = el('button', 'moment-route', 'Find a route');
+        route.type = 'button';
+        const arrow = el('span', '', '↗'); arrow.setAttribute('aria-hidden', 'true'); route.append(arrow);
+        route.addEventListener('click', () => globalThis.window.dispatchEvent(new Event('jweather:explore')));
+        actions.append(route);
+    }
     copy.append(time, list, el('p', 'moment-local', 'Local time in ' + forecast.place.name + '.'), actions, message);
     $('moment-visual').hidden = false;
     drawTimeline(window);
@@ -356,6 +363,11 @@ window.addEventListener('jweather:personal', () => {
         preferences.useMyHours = profile.enabled; preferences.period = 'any';
         preferences.activity = profile.activity; preferences.duration = profile.duration;
         chosen = null; save(); syncControls(); render();
+    } else if (chosen && forecast && $('save-moment')) {
+        const saved = getState().plans.some(plan => plan.activity === chosen.activity && plan.start === chosen.start
+            && plan.end === chosen.end && placeKey(plan.place) === placeKey(forecast.place));
+        $('save-moment').textContent = saved ? 'Saved ✓' : 'Save plan';
+        $('save-moment').disabled = saved;
     }
 });
 const hours = $('use-my-hours');

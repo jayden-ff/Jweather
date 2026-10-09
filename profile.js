@@ -1,7 +1,7 @@
-import { el, button, makeDialog } from './ui.js?v=20261008.5';
-import { activities } from './activity-engine.js?v=20261008.5';
-import { getState, setProfile, toggleFavorite, hasPersistentStorage } from './personal-store.js?v=20261008.5';
-import { pickPlace } from './place-picker.js?v=20261008.5';
+import { el, button, makeDialog } from './ui.js?v=20261009.1';
+import { activities } from './activity-engine.js?v=20261009.1';
+import { getState, setProfile, toggleFavorite, hasPersistentStorage } from './personal-store.js?v=20261009.1';
+import { pickPlace } from './place-picker.js?v=20261009.1';
 let editor;
 export function editProfile() {
     if (!editor) editor = makeDialog('profile-dialog', 'Your kind of day.', 'My day');
@@ -11,6 +11,14 @@ export function editProfile() {
     const duration = selectField('Time to spare', 'profile-duration', [['30', '30 minutes'], ['60', '1 hour'], ['90', '90 minutes']], String(state.profile.duration));
     const fields = el('div', 'profile-fields');
     fields.append(activity.label, duration.label);
+    const sunsetNote = el('p', 'journey-note', 'Sunset moments last 45 minutes, timed around the last light.');
+    const syncActivity = () => {
+        duration.label.hidden = activity.select.value === 'sunset';
+        sunsetNote.hidden = activity.select.value !== 'sunset';
+        fields.classList.toggle('single-field', duration.label.hidden);
+    };
+    activity.select.addEventListener('change', syncActivity);
+    syncActivity();
     const presetLabel = el('label', 'journey-field', 'When are you usually free?');
     const preset = el('select', 'journey-select');
     preset.id = 'profile-preset';
@@ -18,14 +26,17 @@ export function editProfile() {
         const option = el('option', '', text); option.value = value; preset.append(option);
     }
     presetLabel.append(preset);
-    const timeFields = el('div', 'profile-fields');
+    const timeFields = el('div', 'profile-fields profile-time-fields');
     const from = timeField('From', 'profile-from', state.profile.from);
     const to = timeField('Until', 'profile-to', state.profile.to);
     timeFields.append(from.label, to.label);
+    const presetTimes = { any: ['06:00', '23:59'], morning: ['06:00', '12:00'], lunch: ['12:00', '14:00'], evening: ['17:00', '21:00'] };
+    preset.value = Object.keys(presetTimes).find(key => presetTimes[key][0] === from.input.value && presetTimes[key][1] === to.input.value) || 'custom';
     preset.addEventListener('change', () => {
-        const times = { any: ['06:00', '23:59'], morning: ['06:00', '12:00'], lunch: ['12:00', '14:00'], evening: ['17:00', '21:00'] }[preset.value];
+        const times = presetTimes[preset.value];
         if (times) { from.input.value = times[0]; to.input.value = times[1]; }
     });
+    [from.input, to.input].forEach(input => input.addEventListener('input', () => { preset.value = 'custom'; }));
     const days = el('fieldset', 'profile-days');
     days.append(el('legend', '', 'On these days'));
     const checks = [];
@@ -49,12 +60,13 @@ export function editProfile() {
     const message = el('p', 'journey-status'); message.setAttribute('role', 'status');
     const submit = el('button', 'solid-button', 'Save my day'); submit.type = 'submit';
     const note = el('p', 'journey-note', 'These preferences and your places stay in your browser.');
-    form.append(fields, presetLabel, timeFields, days, places, note, message, submit);
+    const footer = el('div', 'profile-footer'); footer.append(message, submit);
+    form.append(fields, sunsetNote, presetLabel, timeFields, days, places, note, footer);
     form.addEventListener('submit', event => {
         event.preventDefault();
         const weekdays = checks.filter(c => c.checked).map(c => Number(c.value));
-        if (!weekdays.length) { message.textContent = 'Choose at least one day.'; return; }
-        if (from.input.value >= to.input.value) { message.textContent = 'Choose an end time after the start time.'; return; }
+        if (!weekdays.length) { message.textContent = 'Choose at least one day.'; checks[0].focus(); return; }
+        if (from.input.value >= to.input.value) { message.textContent = 'Choose an end time after the start time.'; to.input.focus(); return; }
         setProfile({ activity: activity.select.value, duration: Number(duration.select.value),
             from: from.input.value, to: to.input.value, weekdays, enabled: true });
         if (!hasPersistentStorage()) message.textContent = 'Saved for this visit. Browser storage is unavailable.';

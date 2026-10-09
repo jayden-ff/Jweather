@@ -1,4 +1,4 @@
-import { activities } from './activity-engine.js?v=20261008.5';
+import { activities } from './activity-engine.js?v=20261009.1';
 
 const googleScope = 'https://www.googleapis.com/auth/calendar.events.owned';
 const microsoftScope = 'https://graph.microsoft.com/Calendars.ReadWrite';

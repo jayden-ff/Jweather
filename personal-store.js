@@ -1,4 +1,4 @@
-import { activities } from './activity-engine.js?v=20261008.5';
+import { activities } from './activity-engine.js?v=20261009.1';
 const key = 'jweather.personal.v1';
 const clean = value => typeof value === 'string' ? value.trim().slice(0, 140) : '';
 export function validPlace(place) {
@@ -100,6 +100,24 @@ export function linkCalendar(id, provider, eventID) {
     }
 }
 export function removePlan(id) { state.plans = state.plans.filter(p => p.id !== id); write(); }
+export function restorePlan(plan) {
+    const restored = sanitizeState({ plans: [plan] }).plans[0];
+    if (!restored) throw new Error('This plan cannot be restored.');
+    if (state.plans.some(p => p.id === restored.id)) return;
+    const duplicate = state.plans.findIndex(p => p.activity === restored.activity && p.start === restored.start
+        && p.end === restored.end && placeKey(p.place) === placeKey(restored.place));
+    if (duplicate >= 0) {
+        const calendar = state.plans[duplicate].calendar;
+        if (calendar && (calendar.provider !== restored.calendar?.provider || calendar.id !== restored.calendar?.id)) {
+            throw new Error('This moment now has a different calendar link. Remove that saved plan before undoing.');
+        }
+        state.plans[duplicate] = restored;
+    } else {
+        if (state.plans.length >= 24) throw new Error('Your plan list is full. Remove an old plan first.');
+        state.plans.push(restored);
+    }
+    write();
+}
 export function clearPersonalData() { state = defaults(); write(); }
 if (typeof globalThis.addEventListener === 'function') globalThis.addEventListener('storage', event => {
     if (event.key !== key) return;

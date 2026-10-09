@@ -1,5 +1,5 @@
 /* Only the app shell and public forecast responses are kept offline. */
-const VERSION = '20261008.5';
+const VERSION = '20261009.1';
 const SHELL = 'jweather-shell-' + VERSION;
 const FORECASTS = 'jweather-forecasts-v1';
 const ROOT = new URL('./', self.location.href);
@@ -7,7 +7,7 @@ const FILES = [
     './', 'index.html', 'weather.html', 'weather.css', 'activities.css', 'journey.css',
     'theme.js', 'weather.js', 'activities.js', 'activity-engine.js', 'calendar.js', 'calendar-config.js',
     'journey.js', 'app.js', 'ui.js', 'personal-store.js', 'forecast-api.js', 'place-picker.js', 'profile.js',
-    'myday.js', 'plans.js', 'share-plan.js', 'route-service.js', 'explore.js', 'compare.js', 'manifest.webmanifest',
+    'myday.js', 'plans.js', 'feedback.js', 'share-plan.js', 'route-service.js', 'explore.js', 'compare.js', 'manifest.webmanifest',
     'assets/favicon.svg', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png', 'assets/icons/apple-touch-icon.png',
     'assets/fonts/dm-sans-regular.ttf', 'assets/fonts/dm-sans-medium.ttf', 'assets/fonts/dm-sans-semibold.ttf',
     'assets/fonts/instrument-serif-regular.ttf', 'assets/fonts/instrument-serif-italic.ttf',

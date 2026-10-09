@@ -1,8 +1,8 @@
-import { el, button, placeURL } from './ui.js?v=20261008.5';
-import { getState, placeKey, savePlan, hasPersistentStorage } from './personal-store.js?v=20261008.5';
-import { fetchForecast } from './forecast-api.js?v=20261008.5';
-import { findWindows, activities, clockTime, localParts, dayLabel } from './activity-engine.js?v=20261008.5';
-import { pickPlace } from './place-picker.js?v=20261008.5';
+import { el, button, placeURL } from './ui.js?v=20261009.1';
+import { getState, placeKey, savePlan, hasPersistentStorage } from './personal-store.js?v=20261009.1';
+import { fetchForecast } from './forecast-api.js?v=20261009.1';
+import { findWindows, activities, clockTime, localParts, dayLabel } from './activity-engine.js?v=20261009.1';
+import { pickPlace } from './place-picker.js?v=20261009.1';
 export function comparisonDates(today, mode) {
     const date = new Date(today + 'T12:00:00Z');
     if (mode === 'tomorrow') return [new Date(date.getTime() + 86400000).toISOString().slice(0, 10)];
@@ -73,8 +73,9 @@ export function createComparison(container, getContext) {
                     el('p', 'comparison-day', dayLabel(window.date, today)),
                     el('p', 'journey-note', Math.round(context.unit === 'fahrenheit' ? window.minTemperature * 9 / 5 + 32 : window.minTemperature) + '°' + (context.unit === 'fahrenheit' ? 'F' : 'C')
                         + ' · Rain up to ' + Math.round(window.rain) + '% · Wind up to ' + Math.round(window.wind) + ' km/h'));
-                const save = button('Save this moment', 'quiet-button', () => {
-                    try { savePlan(window, item.place); status.textContent = hasPersistentStorage() ? 'Saved to your plans.' : 'Saved for this visit.'; save.textContent = 'Saved ✓'; }
+                card.moment = { window, place: item.place };
+                const save = button('Save this moment', 'quiet-button comparison-save', () => {
+                    try { savePlan(window, item.place); status.textContent = hasPersistentStorage() ? 'Saved to your plans.' : 'Saved for this visit.'; syncSaved(); }
                     catch (error) { status.textContent = error.message; }
                 });
                 card.append(save);
@@ -86,6 +87,16 @@ export function createComparison(container, getContext) {
             cards.append(card);
         });
         if (places.length < 2) status.textContent = 'Add another place to find your best option.';
+        syncSaved();
     }
-    return { open: update, update };
+    function syncSaved() {
+        const plans = getState().plans;
+        cards.querySelectorAll('.comparison-save').forEach(control => {
+            const { window, place } = control.closest('.comparison-card').moment;
+            const saved = plans.some(plan => plan.activity === window.activity && plan.start === window.start
+                && plan.end === window.end && placeKey(plan.place) === placeKey(place));
+            control.textContent = saved ? 'Saved ✓' : 'Save this moment'; control.disabled = saved;
+        });
+    }
+    return { open: update, update, syncSaved };
 }

@@ -44,13 +44,14 @@ try {
             wind_speed_10m: Array(48).fill(9), wind_gusts_10m: Array(48).fill(15),
             uv_index: Array(48).fill(2), cloud_cover: Array(48).fill(25) }
     };
-    await page.route('https://api.open-meteo.com/**', route => {
+    const serveForecast = route => {
         const data = structuredClone(preview);
         const latitude = Number(new URL(route.request().url()).searchParams.get('latitude'));
         if (latitude === 48.8566) { data.timezone = 'Europe/Paris'; data.hourly.precipitation_probability.fill(30); data.hourly.wind_speed_10m.fill(16); }
         if (latitude === 41.9028) { data.timezone = 'Europe/Rome'; data.hourly.precipitation_probability.fill(15); }
         return route.fulfill({ json: data });
-    });
+    };
+    await page.route('https://api.open-meteo.com/**', serveForecast);
     await page.goto(base);
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: fileURLToPath(new URL('home.png', output)), fullPage: true });
@@ -65,10 +66,14 @@ try {
     await page.evaluate(() => { document.activeElement.blur(); window.scrollTo(0, 0); });
     await page.evaluate(() => window.JweatherTheme.setPreference('dark'));
     await page.screenshot({ path: fileURLToPath(new URL('forecast-dark.png', output)), fullPage: true });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.screenshot({ path: fileURLToPath(new URL('forecast-mobile.png', output)), fullPage: true });
-    await page.setViewportSize({ width: 1440, height: 1050 });
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true,
+        deviceScaleFactor: 1, colorScheme: 'dark', reducedMotion: 'reduce', timezoneId: 'Europe/Lisbon', serviceWorkers: 'block' });
+    await mobile.clock.install({ time: new Date('2026-10-08T16:45:00Z') });
+    await mobile.route('https://api.open-meteo.com/**', serveForecast);
+    await mobile.goto(page.url());
+    await mobile.locator('.moment-time').waitFor();
+    await mobile.evaluate(() => document.fonts.ready);
+    await mobile.screenshot({ path: fileURLToPath(new URL('forecast-mobile.png', output)), fullPage: true });
     await page.evaluate(() => window.JweatherTheme.setPreference('light'));
     await page.locator('#favorite-place').click();
     await page.locator('[data-edit-profile]').click();
@@ -78,6 +83,15 @@ try {
     await page.locator('.myday-time').waitFor();
     await page.evaluate(() => document.fonts.ready);
     await page.locator('#myday-section').screenshot({ path: fileURLToPath(new URL('my-day.png', output)) });
+    const personal = await page.evaluate(() => localStorage.getItem('jweather.personal.v1'));
+    await mobile.evaluate(value => { localStorage.setItem('jweather.personal.v1', value); window.JweatherTheme.setPreference('light'); }, personal);
+    await mobile.goto(base + 'index.html');
+    await mobile.locator('.myday-time').waitFor();
+    await mobile.evaluate(() => { document.activeElement.blur(); scrollTo(0, 0); });
+    await mobile.screenshot({ path: fileURLToPath(new URL('home-mobile.png', output)), fullPage: true });
+    await mobile.locator('[data-edit-profile]').click();
+    await mobile.screenshot({ path: fileURLToPath(new URL('preferences-mobile.png', output)) });
+    await mobile.keyboard.press('Escape');
     await page.evaluate(() => localStorage.setItem('jweather.personal.v1', JSON.stringify({
         ...JSON.parse(localStorage.getItem('jweather.personal.v1')), favorites: [
             { latitude: 38.7223, longitude: -9.1393, name: 'Lisbon', country: 'Portugal' },
@@ -90,40 +104,45 @@ try {
     await page.locator('.comparison-card h4').first().waitFor();
     await page.locator('#workspace').screenshot({ path: fileURLToPath(new URL('compare-places.png', output)) });
     if (process.env.JWEATHER_SCREENSHOT_MAP === '1') {
-        const mapPage = await browser.newPage({ viewport: { width: 1440, height: 1050 }, colorScheme: 'light', reducedMotion: 'reduce', serviceWorkers: 'block' });
-        await mapPage.clock.install({ time: new Date(now) });
+        const mapOptions = { colorScheme: 'light', reducedMotion: 'reduce', serviceWorkers: 'block' };
+        const mapPage = await browser.newPage({ ...mapOptions, viewport: { width: 1440, height: 1050 } });
+        const mobileMap = await browser.newPage({ ...mapOptions, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
         const weather = forecast(); weather.current.weather_code = 0; weather.current.temperature_2m = 19;
         weather.hourly.temperature_2m.fill(19); weather.hourly.precipitation_probability.fill(5);
-        await mapPage.route('https://api.open-meteo.com/**', route => route.fulfill({ json: weather }));
         const example = JSON.parse(await readFile(new URL('./map-example.json', import.meta.url), 'utf8'));
-        await mapPage.route('https://overpass-api.de/**', route => route.fulfill({ json: example.parks }));
-        await mapPage.route('https://routing.openstreetmap.de/**', route => {
+        const serveRoute = route => {
             const data = example.routes[route.request().url()];
             if (!data) throw new Error('Unexpected example route.');
             return route.fulfill({ json: data });
-        });
+        };
         const tiles = new Map(); const run = promisify(execFile);
-        await mapPage.route('https://tile.openstreetmap.org/**', async route => {
+        const serveTile = async route => {
             const url = route.request().url();
             if (!tiles.has(url)) tiles.set(url, run('curl', ['--fail', '--silent', '--show-error', '--max-time', '30',
                 '--user-agent', 'Jweather documentation capture (+https://jayden-ff.github.io/Jweather/)', url], { encoding: 'buffer', maxBuffer: 1024 * 1024 }));
             const response = await tiles.get(url);
             await route.fulfill({ contentType: 'image/png', body: response.stdout });
-        });
-        await mapPage.goto(base + 'weather.html?lat=52.52&lon=13.405&name=Berlin&country=Germany');
-        await mapPage.locator('#outside-preferences summary').click();
-        await mapPage.locator('#outside-duration').selectOption('90');
-        await mapPage.locator('#map-tab').click();
-        await mapPage.locator('.route-card').nth(1).waitFor();
-        await mapPage.waitForFunction(() => [...document.querySelectorAll('.leaflet-tile')].every(tile => tile.complete && tile.naturalWidth > 0));
-        await mapPage.evaluate(() => document.fonts.ready);
-        await mapPage.locator('#workspace').screenshot({ path: fileURLToPath(new URL('explore.png', output)) });
-        await mapPage.setViewportSize({ width: 390, height: 844 });
-        await mapPage.waitForFunction(() => [...document.querySelectorAll('.leaflet-tile')].every(tile => tile.complete && tile.naturalWidth > 0));
-        await mapPage.locator('#workspace').screenshot({ path: fileURLToPath(new URL('explore-mobile.png', output)) });
+        };
+        for (const [view, name] of [[mapPage, 'explore.png'], [mobileMap, 'explore-mobile.png']]) {
+            await view.clock.install({ time: new Date(now) });
+            await view.route('https://api.open-meteo.com/**', route => route.fulfill({ json: weather }));
+            await view.route('https://overpass-api.de/**', route => route.fulfill({ json: example.parks }));
+            await view.route('https://routing.openstreetmap.de/**', serveRoute);
+            await view.route('https://tile.openstreetmap.org/**', serveTile);
+            await view.goto(base + 'weather.html?lat=52.52&lon=13.405&name=Berlin&country=Germany');
+            await view.locator('#outside-preferences summary').click();
+            await view.locator('#outside-duration').selectOption('90');
+            await view.locator('#map-tab').click();
+            await view.locator('.route-card').nth(1).waitFor();
+            await view.waitForFunction(() => [...document.querySelectorAll('.leaflet-tile')].every(tile => tile.complete && tile.naturalWidth > 0));
+            await view.evaluate(() => document.fonts.ready);
+            await view.mouse.move(0, 0);
+            await view.evaluate(() => document.activeElement.blur());
+            await view.locator('#workspace').screenshot({ path: fileURLToPath(new URL(name, output)) });
+        }
         console.log('Saved desktop and mobile map screenshots with real Berlin routes and visible OSM tiles.');
     }
-    console.log('Saved eight interface screenshots to docs/screenshots/ (example forecast data).');
+    console.log('Saved ten interface screenshots to docs/screenshots/ (example forecast data).');
 } finally {
     await browser?.close();
     server?.kill();

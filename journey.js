@@ -1,10 +1,10 @@
-import { getState, toggleFavorite, hasPersistentStorage, placeKey } from './personal-store.js?v=20261008.5';
-import { rememberForecast } from './forecast-api.js?v=20261008.5';
-import { editProfile } from './profile.js?v=20261008.5';
-import { initMyDay } from './myday.js?v=20261008.5';
-import { initPlans, renderPlans, renderSharedPlan } from './plans.js?v=20261008.5';
-import { createExplorer } from './explore.js?v=20261008.5';
-import { createComparison } from './compare.js?v=20261008.5';
+import { getState, toggleFavorite, hasPersistentStorage, placeKey } from './personal-store.js?v=20261009.1';
+import { rememberForecast } from './forecast-api.js?v=20261009.1';
+import { editProfile } from './profile.js?v=20261009.1';
+import { initMyDay } from './myday.js?v=20261009.1';
+import { initPlans, renderPlans, renderSharedPlan } from './plans.js?v=20261009.1';
+import { createExplorer } from './explore.js?v=20261009.1';
+import { createComparison } from './compare.js?v=20261009.1';
 
 let forecast = window.JweatherForecast;
 let explorer, comparison;
@@ -29,6 +29,7 @@ document.getElementById('favorite-place')?.addEventListener('click', () => {
     syncFavorite();
 });
 window.addEventListener('jweather:personal', syncFavorite);
+window.addEventListener('jweather:personal', () => { explorer?.update(); comparison?.syncSaved(); });
 function receiveForecast(value) {
     forecast = value;
     rememberForecast(value.place, value.weather);
@@ -57,6 +58,11 @@ function openTab(value, focus = false) {
         comparison.open();
     }
 }
+window.addEventListener('jweather:explore', () => {
+    openTab('map', true);
+    document.getElementById('workspace')?.scrollIntoView({ block: 'start',
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+});
 tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => openTab(tab.dataset.workspace));
     tab.addEventListener('keydown', event => {

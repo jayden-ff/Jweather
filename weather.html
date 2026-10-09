@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#f3f0e9">
     <meta name="description" content="Current conditions, an hourly forecast, and the next five days for your location.">
     <title>Your forecast — Jweather</title>
@@ -13,14 +13,14 @@
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <script src="theme.js?v=20261008.3"></script>
-    <link rel="stylesheet" href="weather.css?v=20261008.5">
-    <link rel="stylesheet" href="activities.css?v=20261008.5">
-    <link rel="stylesheet" href="journey.css?v=20261008.5">
-    <script src="calendar-config.js?v=20261008.5" defer></script>
-    <script type="module" src="activities.js?v=20261008.5"></script>
-    <script type="module" src="journey.js?v=20261008.5"></script>
-    <script type="module" src="app.js?v=20261008.5"></script>
-    <script src="weather.js?v=20261008.5" defer></script>
+    <link rel="stylesheet" href="weather.css?v=20261009.1">
+    <link rel="stylesheet" href="activities.css?v=20261009.1">
+    <link rel="stylesheet" href="journey.css?v=20261009.1">
+    <script src="calendar-config.js?v=20261009.1" defer></script>
+    <script type="module" src="activities.js?v=20261009.1"></script>
+    <script type="module" src="journey.js?v=20261009.1"></script>
+    <script type="module" src="app.js?v=20261009.1"></script>
+    <script src="weather.js?v=20261009.1" defer></script>
 </head>
 <body data-page="weather">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -29,7 +29,6 @@
             <a class="wordmark" href="index.html" aria-label="Jweather home"><svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6.1 6.1l2.8 2.8m14.2 14.2 2.8 2.8M6.1 25.9l2.8-2.8M23.1 8.9l2.8-2.8"/></svg>jweather<span class="wordmark-dot">.</span></a>
             <div class="header-actions">
                 <a class="back-link" href="index.html" aria-label="Another place"><span aria-hidden="true">←</span><span class="back-link-label">Another place</span></a>
-                <div class="unit-switch" role="group" aria-label="Temperature unit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
                 <details class="theme-picker" id="theme-picker">
                     <summary aria-label="Change appearance" title="Change appearance"><svg class="theme-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 16A8 8 0 0 1 8 3a8 8 0 1 0 9 13Z"/></svg></summary>
                     <div class="theme-options" role="group" aria-label="Appearance">
@@ -53,9 +52,13 @@
                 <div class="offline-notice" id="forecast-notice" role="status" hidden></div>
                 <div class="weather-heading reveal">
                     <div><p class="eyebrow" id="location-region"></p><div class="location-title-row"><h1 id="location-name"></h1><button type="button" class="favorite-place" id="favorite-place" aria-label="Save this place" aria-pressed="false">☆</button></div><p class="journey-status" id="favorite-status" role="status"></p></div>
+                    <div class="weather-tools">
                     <div class="local-time"><span class="live-dot" aria-hidden="true"></span><span id="local-date"></span><span id="local-time"></span></div>
+                <div class="unit-switch" role="group" aria-label="Temperature unit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
+                    </div>
                 </div>
-                <section class="current-section reveal" style="--delay:80ms" aria-labelledby="current-title">
+                <nav class="forecast-navigation" aria-label="Forecast sections"><a href="#current-section">Now</a><a href="#outside-section">Time outside</a><a href="#workspace">Your day</a><a href="#hourly-section">Forecast</a></nav>
+                <section class="current-section reveal" id="current-section" style="--delay:80ms" aria-labelledby="current-title">
                     <div class="current-overview">
                         <div class="weather-atmosphere" aria-hidden="true">
                             <div class="atmosphere-halo"></div><div class="atmosphere-haze"></div>
@@ -101,17 +104,17 @@
                     <details class="moment-method"><summary>How we find your moment</summary><p>We compare daylight, temperature, rain chance, wind and gusts across the whole activity. Suggestions allow up to 35% rain chance and avoid storms, freezing rain, strong winds and very high UV. Cycling uses a lower wind limit. Sunset suggestions also need some clear sky; colours are never guaranteed. These are forecast-based suggestions, so check conditions before you go.</p></details>
                 </section>
                 <section class="workspace-section" id="workspace" aria-labelledby="workspace-title">
-                    <div class="section-heading"><h2 id="workspace-title">Make a day of it.</h2><button type="button" class="quiet-button" data-edit-profile>Your preferences ↗</button></div>
+                    <div class="section-heading workspace-heading"><h2 id="workspace-title">Make a day of it.</h2><button type="button" class="quiet-button" data-edit-profile>Your preferences ↗</button></div>
                     <div class="workspace-tabs" role="tablist" aria-label="Your outdoor day">
                         <button type="button" role="tab" id="plans-tab" aria-controls="plans-panel" aria-selected="true" tabindex="0" data-workspace="plans">My plans <span id="plans-count"></span></button>
                         <button type="button" role="tab" id="map-tab" aria-controls="map-panel" aria-selected="false" tabindex="-1" data-workspace="map">Explore ↗</button>
                         <button type="button" role="tab" id="compare-tab" aria-controls="compare-panel" aria-selected="false" tabindex="-1" data-workspace="compare">Compare places</button>
                     </div>
-                    <div role="tabpanel" id="plans-panel" aria-labelledby="plans-tab"><div id="shared-plan"></div><div id="saved-plans"></div></div>
-                    <div role="tabpanel" id="map-panel" aria-labelledby="map-tab" hidden></div>
-                    <div role="tabpanel" id="compare-panel" aria-labelledby="compare-tab" hidden></div>
+                    <div class="workspace-panel" role="tabpanel" id="plans-panel" aria-labelledby="plans-tab"><div id="shared-plan"></div><div id="saved-plans"></div></div>
+                    <div class="workspace-panel" role="tabpanel" id="map-panel" aria-labelledby="map-tab" hidden></div>
+                    <div class="workspace-panel" role="tabpanel" id="compare-panel" aria-labelledby="compare-tab" hidden></div>
                 </section>
-                <section class="hourly-section reveal" style="--delay:140ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">The hours ahead</h2><span>All times are local.</span></div><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Hourly forecast, scroll horizontally"></div></section>
+                <section class="hourly-section reveal" id="hourly-section" style="--delay:140ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">The hours ahead</h2><span>All times are local.</span></div><p class="hourly-scroll-hint">Swipe to see the hours ahead <span aria-hidden="true">→</span></p><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Hourly forecast, scroll horizontally"></div></section>
                 <section class="forecast-section reveal" style="--delay:200ms" aria-labelledby="forecast-title"><div class="section-heading"><h2 id="forecast-title">Looking ahead</h2><span>The next five days <span aria-hidden="true">↗</span></span></div><div class="forecast-list" id="forecast"></div><p class="forecast-hint">Choose a day for a closer look.</p></section>
             </div>
         </main>

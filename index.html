@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#f3f0e9">
     <meta name="description" content="Current weather, the hours ahead, and a five-day forecast for wherever you are.">
     <title>Jweather — Weather at a glance.</title>
@@ -13,12 +13,12 @@
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <script src="theme.js?v=20261008.3"></script>
-    <link rel="stylesheet" href="weather.css?v=20261008.5">
-    <link rel="stylesheet" href="journey.css?v=20261008.5">
-    <script src="calendar-config.js?v=20261008.5" defer></script>
-    <script type="module" src="journey.js?v=20261008.5"></script>
-    <script type="module" src="app.js?v=20261008.5"></script>
-    <script src="weather.js?v=20261008.5" defer></script>
+    <link rel="stylesheet" href="weather.css?v=20261009.1">
+    <link rel="stylesheet" href="journey.css?v=20261009.1">
+    <script src="calendar-config.js?v=20261009.1" defer></script>
+    <script type="module" src="journey.js?v=20261009.1"></script>
+    <script type="module" src="app.js?v=20261009.1"></script>
+    <script src="weather.js?v=20261009.1" defer></script>
 </head>
 <body data-page="home">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -48,7 +48,7 @@
                 <p class="intro-copy">A forecast. A little time outside.<br>Find the right moment for what you love.</p>
                 <div class="search-area" data-search>
                     <div class="search-control">
-                        <form class="search-form" role="search" autocomplete="off">
+                        <form class="search-form" role="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
                             <label class="sr-only" for="location-search">Search for a city or place</label>
                             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></svg>
                             <input id="location-search" name="location" type="search" placeholder="Where are we heading?" role="combobox" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" aria-describedby="search-status" maxlength="100" spellcheck="false">

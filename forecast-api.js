@@ -1,4 +1,4 @@
-import { placeKey, validPlace } from './personal-store.js?v=20261008.5';
+import { placeKey, validPlace } from './personal-store.js?v=20261009.1';
 const forecasts = new Map();
 export function forecastURL(place) {
     const url = new URL('https://api.open-meteo.com/v1/forecast');

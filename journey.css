@@ -6,15 +6,15 @@ button:disabled { cursor: default; opacity: .65; }
 .journey-status:empty { display: none; }
 .journey-status { margin-top: 10px; }
 .journey-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; }
-.journey-field { display: flex; flex-direction: column; gap: 7px; font-size: 10px; color: var(--muted); }
+.journey-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; font-size: 10px; color: var(--muted); }
 .journey-select, .journey-input { font: 400 12px/1.5 var(--sans); min-width: 0; max-width: 100%; min-height: 44px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 0; background: var(--paper); color: var(--ink); }
 .journey-input { width: 100%; }
 .journey-select { cursor: pointer; }
 .journey-dialog-content { margin-top: 24px; }
 .journey-dialog { width: min(530px, calc(100% - 32px)); }
 .journey-dialog .dialog-close { font-size: 22px; }
-.profile-form { display: grid; gap: 18px; }
-.profile-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.profile-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; }
+.profile-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; min-width: 0; }
 .profile-days { border: 0; padding: 0; margin: 0; display: flex; gap: 5px; flex-wrap: wrap; }
 .profile-days legend { color: var(--muted); font-size: 10px; margin-bottom: 8px; }
 .profile-days label { position: relative; flex: 1; min-width: 36px; }
@@ -158,4 +158,84 @@ button:disabled { cursor: default; opacity: .65; }
 }
 @media (prefers-reduced-motion: reduce) {
     .journey-dialog *, .myday-section *, .workspace-section *, .moment-actions * { animation: none !important; transition: none !important; }
+}
+
+/* Finishing details for hands, keyboards, and small screens. */
+.weather-tools { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+.weather-tools .local-time { padding-bottom: 0; }
+.unit-switch button { min-width: 44px; height: 44px; }
+.theme-picker summary, .dialog-close, .favorite-place { width: 44px; height: 44px; }
+.weather-heading > div:first-child { min-width: 0; }
+.location-title-row h1 { min-width: 0; }
+.location-title-row .favorite-place { align-self: flex-start; margin-top: 8px; }
+.back-link { min-height: 44px; }
+.workspace-section { scroll-margin-top: 20px; }
+.workspace-panel { min-width: 0; }
+.workspace-tabs button { white-space: nowrap; }
+.moment-route { display: flex; justify-content: space-between; align-items: center; gap: 14px; width: 100%; min-height: 44px; padding: 12px 0; color: var(--accent-ink); background: transparent; border-top: 1px solid var(--line); font-size: 12px; }
+.moment-route span { transition: transform .25s var(--ease); }
+.moment-route:hover span { transform: translate(2px, -2px); }
+.map-toolbar [aria-pressed="true"] { border-color: var(--accent-ink); }
+.map-toolbar > [aria-pressed="true"] { background: var(--panel); color: var(--accent-ink); }
+.map-touch-hint { font-size: 11px; color: var(--muted); line-height: 1.7; margin-top: 10px; }
+.map-stage .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px; }
+.route-fit { margin-top: 8px; }
+.route-select[aria-pressed="true"] .eyebrow { color: var(--accent-ink); }
+.profile-fields.single-field { grid-template-columns: 1fr; }
+.profile-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.profile-days label { min-width: 0; }
+.profile-days span { display: grid; place-items: center; min-height: 44px; padding: 8px 0; }
+.profile-footer .solid-button { width: 100%; }
+.profile-footer .journey-status:not(:empty) { margin: 0 0 12px; }
+.day-dialog { inset-block-start: var(--viewport-top, 0px); inset-block-end: max(0px, calc(100dvh - var(--available-height, 100dvh) - var(--viewport-top, 0px))); max-height: calc(var(--available-height, 100dvh) - 32px); overscroll-behavior-y: contain; }
+.dialog-topline { position: sticky; top: -8px; z-index: 3; padding: 8px 0; margin-top: -8px; background: var(--paper); box-shadow: 0 -16px 0 16px var(--paper); }
+.hourly-list { scroll-snap-type: x proximity; }
+.hour-item { scroll-snap-align: start; }
+.hourly-scroll-hint { display: none; }
+.forecast-navigation { display: none; }
+.feedback-toast { position: fixed; z-index: 1000; inset-inline: 16px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 16px; width: fit-content; max-width: min(520px, calc(100% - 32px)); margin-inline: auto; padding: 12px 12px 12px 20px; background: var(--ink); color: var(--paper); box-shadow: 0 10px 40px #0003; animation: reveal .3s var(--ease) both; }
+.feedback-message { font-size: 12px; line-height: 1.6; }
+.feedback-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.feedback-actions .quiet-button { color: var(--paper); border-color: currentColor; }
+.feedback-actions .quiet-button:hover { color: var(--ink); background: var(--paper); transform: none; }
+.feedback-dismiss { display: grid; place-items: center; width: 44px; height: 44px; background: transparent; color: inherit; font-size: 24px; }
+@media (max-width: 900px) {
+    .weather-tools { flex-direction: column; align-items: flex-end; gap: 12px; }
+}
+@media (max-width: 600px) {
+    .site-shell { padding-inline: max(22px, env(safe-area-inset-left)) max(22px, env(safe-area-inset-right)); }
+    .site-footer { padding-bottom: max(26px, env(safe-area-inset-bottom)); }
+    .back-link { width: 44px; height: 44px; }
+    .theme-picker summary { width: 44px; height: 44px; }
+    .search-form input, .journey-select, .journey-input, .outside-select { font-size: 16px; }
+    .journey-select, .journey-input { min-height: 48px; }
+    .profile-time-fields .journey-input { padding-inline: 8px; }
+    .journey-note, .journey-status, .journey-label, .plan-status, .myday-conditions { font-size: 12px; }
+    .weather-heading { display: block; }
+    .weather-heading h1 { font-size: clamp(44px, 13.5vw, 56px); }
+    .weather-tools { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin-top: 20px; }
+    .weather-tools .local-time { flex-wrap: wrap; gap: 7px; white-space: normal; }
+    .forecast-navigation { position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; gap: 3px; padding-block: 4px; margin-bottom: 20px; border-block: 1px solid var(--line); background: var(--paper); }
+    .forecast-navigation a { display: grid; place-items: center; min-height: 44px; padding-inline: 4px; color: var(--muted); font-size: 11px; }
+    .forecast-navigation a:hover { color: var(--accent-ink); }
+    #current-section, #outside-section, #workspace, #hourly-section { scroll-margin-top: 76px; }
+    .unit-switch { flex-shrink: 0; }
+    .unit-switch button { min-width: 44px; height: 44px; }
+    body[data-personalized="true"] .myday-section { grid-row: 2; }
+    body[data-personalized="true"] .weather-art { grid-row: 3; }
+    .workspace-tabs { gap: 0; justify-content: space-between; }
+    .workspace-tabs button { font-size: 11px; padding-inline: 5px; }
+    .workspace-heading { gap: 12px; }
+    .workspace-heading h2 { font-size: 30px; }
+    .hourly-scroll-hint { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin: -4px 0 12px; }
+    .journey-dialog { padding: 24px; }
+    .profile-footer { position: sticky; bottom: -24px; background: var(--paper); padding: 16px 0 24px; margin-bottom: -24px; box-shadow: 0 12px 0 24px var(--paper); }
+    .feedback-toast { width: calc(100% - 32px); gap: 8px; padding-left: 16px; }
+}
+@media (max-width: 360px) {
+    .profile-time-fields { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .feedback-toast { animation: none; }
+    .moment-route span { transition: none; }
 }

@@ -1,6 +1,6 @@
-import { el, button, makeDialog } from './ui.js?v=20261008.5';
-import { searchPlaces } from './forecast-api.js?v=20261008.5';
-import { getState } from './personal-store.js?v=20261008.5';
+import { el, button, makeDialog } from './ui.js?v=20261009.1';
+import { searchPlaces } from './forecast-api.js?v=20261009.1';
+import { getState } from './personal-store.js?v=20261009.1';
 let picker;
 let select;
 let abort;
@@ -14,6 +14,7 @@ export function pickPlace(onSelect) {
         input.placeholder = 'Search a city or place';
         input.setAttribute('aria-label', 'Find a place');
         input.autocomplete = 'off';
+        input.autocapitalize = 'off'; input.spellcheck = false; input.enterKeyHint = 'search';
         input.maxLength = 100;
         const status = el('p', 'journey-status');
         status.setAttribute('role', 'status');
@@ -21,6 +22,25 @@ export function pickPlace(onSelect) {
         const favorites = el('div', 'picker-favorites');
         picker.content.append(input, status, list, favorites);
         picker.input = input; picker.status = status; picker.list = list; picker.favorites = favorites;
+        input.addEventListener('keydown', event => {
+            if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
+            const options = [...(input.value.trim() ? list : favorites).querySelectorAll('.picker-result')];
+            if (!options.length) return;
+            event.preventDefault();
+            const item = event.key === 'ArrowUp' ? options.at(-1) : options[0];
+            if (event.key === 'Enter') item.click(); else item.focus();
+        });
+        const move = event => {
+            if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+            const options = [...(input.value.trim() ? list : favorites).querySelectorAll('.picker-result')];
+            const index = options.indexOf(document.activeElement);
+            if (index < 0) return;
+            event.preventDefault();
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1
+                : (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+            options[next]?.focus();
+        };
+        list.addEventListener('keydown', move); favorites.addEventListener('keydown', move);
         input.addEventListener('input', () => {
             clearTimeout(timer); abort?.abort(); list.replaceChildren(); status.textContent = '';
             if (input.value.trim().length < 2) return;

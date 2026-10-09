@@ -1,9 +1,9 @@
-import { el, button, placeURL } from './ui.js?v=20261008.5';
-import { fetchForecast } from './forecast-api.js?v=20261008.5';
-import { getState, toggleFavorite, placeKey, savePlan, hasPersistentStorage } from './personal-store.js?v=20261008.5';
-import { activities, findWindows, clockTime, dayLabel } from './activity-engine.js?v=20261008.5';
-import { editProfile } from './profile.js?v=20261008.5';
-import { pickPlace } from './place-picker.js?v=20261008.5';
+import { el, button, placeURL } from './ui.js?v=20261009.1';
+import { fetchForecast } from './forecast-api.js?v=20261009.1';
+import { getState, toggleFavorite, placeKey, savePlan, hasPersistentStorage } from './personal-store.js?v=20261009.1';
+import { activities, findWindows, clockTime, dayLabel } from './activity-engine.js?v=20261009.1';
+import { editProfile } from './profile.js?v=20261009.1';
+import { pickPlace } from './place-picker.js?v=20261009.1';
 let current;
 let generation = 0;
 export function initMyDay() {
@@ -14,6 +14,7 @@ export function initMyDay() {
 }
 async function render(fresh = false) {
     const state = getState();
+    document.body.dataset.personalized = String(state.favorites.length > 0);
     const places = document.getElementById('favorite-links');
     const content = document.getElementById('myday-content');
     const sequence = ++generation;

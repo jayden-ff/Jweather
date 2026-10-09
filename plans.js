@@ -1,9 +1,10 @@
-import { el, button, makeDialog, placeURL, friendlyDate } from './ui.js?v=20261008.5';
-import { getState, removePlan, savePlan, updatePlan, linkCalendar, hasPersistentStorage, placeKey } from './personal-store.js?v=20261008.5';
-import { fetchForecast } from './forecast-api.js?v=20261008.5';
-import { activities, checkPlan, findWindows, clockTime, localParts } from './activity-engine.js?v=20261008.5';
-import { sharePlan, sharedPlanURL, readSharedPlan } from './share-plan.js?v=20261008.5';
-import { configuration, updateDirect, makeEvent, prepareGoogle } from './calendar.js?v=20261008.5';
+import { el, button, makeDialog, placeURL, friendlyDate } from './ui.js?v=20261009.1';
+import { getState, removePlan, restorePlan, savePlan, updatePlan, linkCalendar, hasPersistentStorage, placeKey } from './personal-store.js?v=20261009.1';
+import { showFeedback } from './feedback.js?v=20261009.1';
+import { fetchForecast } from './forecast-api.js?v=20261009.1';
+import { activities, checkPlan, findWindows, clockTime, localParts } from './activity-engine.js?v=20261009.1';
+import { sharePlan, sharedPlanURL, readSharedPlan } from './share-plan.js?v=20261009.1';
+import { configuration, updateDirect, makeEvent, prepareGoogle } from './calendar.js?v=20261009.1';
 let sequence = 0;
 let expanded = false;
 let movement;
@@ -33,8 +34,14 @@ export async function renderPlans(fresh = false) {
         return;
     }
     const toolbar = el('div', 'plans-toolbar');
+    const check = button(fresh ? 'Checking weather …' : 'Check weather ↻', 'quiet-button check-plans', async () => {
+        const focused = document.activeElement === check;
+        await renderPlans(true);
+        if (focused && document.activeElement === document.body) container.querySelector('.check-plans')?.focus({ preventScroll: true });
+    });
+    check.disabled = fresh;
     toolbar.append(el('p', 'journey-note', 'Checked when you open Jweather. Your plans stay in this browser.'),
-        button('Check weather ↻', 'quiet-button', () => renderPlans(true)));
+        check);
     container.append(toolbar);
     const shown = expanded ? plans : plans.slice(0, 4);
     const cards = [];
@@ -50,7 +57,11 @@ export async function renderPlans(fresh = false) {
             status.textContent = await sharePlan(plan, url => showShareLink(url));
         }));
         const view = el('a', 'quiet-button', 'Forecast ↗'); view.href = sharedPlanURL(plan); actions.append(view);
-        actions.append(button('Remove', 'quiet-button', () => removePlan(plan.id)));
+        actions.append(button('Remove', 'quiet-button', event => {
+            const focus = document.activeElement === event.currentTarget;
+            removePlan(plan.id);
+            showFeedback('Plan removed.', { actionLabel: 'Undo', action: () => restorePlan(plan), focus });
+        }));
         text.append(status, actions);
         card.append(text); container.append(card); cards.push({ plan, card, status, actions });
     });
@@ -84,6 +95,7 @@ export async function renderPlans(fresh = false) {
             }));
         }
     }));
+    if (token === sequence) { check.disabled = false; check.textContent = 'Check weather ↻'; }
 }
 function showShareLink(url) {
     const view = makeDialog('share-dialog', 'A plan to share.', 'Time together');
