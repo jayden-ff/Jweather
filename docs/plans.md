@@ -6,7 +6,7 @@ Save a forecast location with the star beside its name, or choose **Add a place*
 
 The home page suggests a suitable moment using those preferences. On phones, My day appears before the illustration once you have a favorite. Presets show the saved hours; editing a time switches to **Your own hours**. Choosing Sunset explains its fixed 45-minute duration.
 
-On the forecast page, **Make it yours → Use my hours** applies the same hours; turn it off to explore other parts of the day. An empty state means the weather or available data does not offer a suitable window. The mobile navigation jumps to current conditions, activity suggestions, plans/maps or the hourly forecast. Dialogs fit the visible viewport, including when the on-screen keyboard opens.
+On the forecast page, **Make it yours → Use my hours** applies the same hours; turn it off to explore other parts of the day. An empty state means the weather or available data does not offer a suitable window. Current conditions and the hourly and five-day forecasts appear before activity suggestions and plans/maps. The mobile navigation follows that same order. Dialogs fit the visible viewport, including when the on-screen keyboard opens.
 
 ## Saved and shared plans
 

@@ -57,7 +57,7 @@
                 <div class="unit-switch" role="group" aria-label="Temperature unit"><button type="button" data-unit="celsius" aria-pressed="true">°C</button><button type="button" data-unit="fahrenheit" aria-pressed="false">°F</button></div>
                     </div>
                 </div>
-                <nav class="forecast-navigation" aria-label="Forecast sections"><a href="#current-section">Now</a><a href="#outside-section">Time outside</a><a href="#workspace">Your day</a><a href="#hourly-section">Forecast</a></nav>
+                <nav class="forecast-navigation" aria-label="Forecast sections"><a href="#current-section">Now</a><a href="#hourly-section">Forecast</a><a href="#outside-section">Time outside</a><a href="#workspace">Your day</a></nav>
                 <section class="current-section reveal" id="current-section" style="--delay:80ms" aria-labelledby="current-title">
                     <div class="current-overview">
                         <div class="weather-atmosphere" aria-hidden="true">
@@ -74,7 +74,9 @@
                     </div>
                     <div class="current-details"><h2 class="eyebrow">The details</h2><dl class="detail-list"><div><dt>Feels like</dt><dd id="feels-like"></dd></div><div><dt>Humidity</dt><dd id="humidity"></dd></div><div><dt>Wind <span class="wind-direction" id="wind-direction"></span></dt><dd id="wind-speed"></dd></div><div><dt>Chance of rain</dt><dd id="rain-chance"></dd></div></dl><div class="sun-times"><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3-3 3 3M3 9l2 2m14 0 2-2"/></svg><span>Sunrise</span><strong id="sunrise"></strong></div><div><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 18h18M6 15a6 6 0 0 1 12 0M12 2v7m-3-3 3 3 3-3M3 9l2 2m14 0 2-2"/></svg><span>Sunset</span><strong id="sunset"></strong></div></div></div>
                 </section>
-                <section class="outside-section reveal" id="outside-section" style="--delay:120ms" aria-labelledby="outside-title" data-activity="walk">
+                <section class="hourly-section reveal" id="hourly-section" style="--delay:120ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">The hours ahead</h2><span>All times are local.</span></div><p class="hourly-scroll-hint">Swipe to see the hours ahead <span aria-hidden="true">→</span></p><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Hourly forecast, scroll horizontally"></div></section>
+                <section class="forecast-section reveal" style="--delay:160ms" aria-labelledby="forecast-title"><div class="section-heading"><h2 id="forecast-title">Looking ahead</h2><span>The next five days <span aria-hidden="true">↗</span></span></div><div class="forecast-list" id="forecast"></div><p class="forecast-hint">Choose a day for a closer look.</p></section>
+                <section class="outside-section reveal" id="outside-section" style="--delay:200ms" aria-labelledby="outside-title" data-activity="walk">
                     <div class="outside-heading"><div><p class="eyebrow"><span class="small-line"></span> Time outside</p><h2 id="outside-title">A good time to go.</h2><p class="outside-intro">Choose your activity. Find a little room in the day.</p></div>
                         <label class="outside-day">Find a moment<select id="outside-day"><option value="next">Next 3 days</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select></label>
                     </div>
@@ -114,8 +116,6 @@
                     <div class="workspace-panel" role="tabpanel" id="map-panel" aria-labelledby="map-tab" hidden></div>
                     <div class="workspace-panel" role="tabpanel" id="compare-panel" aria-labelledby="compare-tab" hidden></div>
                 </section>
-                <section class="hourly-section reveal" id="hourly-section" style="--delay:140ms" aria-labelledby="hourly-title"><div class="section-heading"><h2 id="hourly-title">The hours ahead</h2><span>All times are local.</span></div><p class="hourly-scroll-hint">Swipe to see the hours ahead <span aria-hidden="true">→</span></p><div class="hourly-list" id="hourly-list" tabindex="0" aria-label="Hourly forecast, scroll horizontally"></div></section>
-                <section class="forecast-section reveal" style="--delay:200ms" aria-labelledby="forecast-title"><div class="section-heading"><h2 id="forecast-title">Looking ahead</h2><span>The next five days <span aria-hidden="true">↗</span></span></div><div class="forecast-list" id="forecast"></div><p class="forecast-hint">Choose a day for a closer look.</p></section>
             </div>
         </main>
         <footer class="site-footer"><span>Whatever the sky brings.</span><button type="button" class="app-install" data-install-app>Get the app ↗</button><span>Forecast by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>

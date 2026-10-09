@@ -66,7 +66,7 @@ Places, preferences and saved plans stay on this device, in this browser. There 
 
 ## On your phone
 
-A small navigation bar keeps **Now**, **Time outside**, **Your day** and **Forecast** within reach. Temperature units sit beside the local time. Your personal day appears before the home page illustration once you have a favorite place.
+Current conditions, the hours ahead and the five-day forecast come first. Activities and plans follow below. A small navigation bar keeps **Now**, **Forecast**, **Time outside** and **Your day** within reach. Temperature units sit beside the local time. Your personal day appears before the home page illustration once you have a favorite place.
 
 Controls have more room to tap, search fields avoid the automatic iPhone zoom, and dialogs fit the visible screen when the keyboard opens. Scroll past the map normally; use **Move map** when you want to drag it, or pinch to zoom. **Cancel selection** leaves a start or destination unchanged.
 

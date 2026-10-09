@@ -1,5 +1,5 @@
 /* Only the app shell and public forecast responses are kept offline. */
-const VERSION = '20261009.1';
+const VERSION = '20261009.2';
 const SHELL = 'jweather-shell-' + VERSION;
 const FORECASTS = 'jweather-forecasts-v1';
 const ROOT = new URL('./', self.location.href);
