@@ -1,4 +1,4 @@
-import { activities } from './activity-engine.js?v=20261008.4';
+import { activities } from './activity-engine.js?v=20261008.5';
 
 const googleScope = 'https://www.googleapis.com/auth/calendar.events.owned';
 const microsoftScope = 'https://graph.microsoft.com/Calendars.ReadWrite';
@@ -137,6 +137,13 @@ async function microsoftToken() {
     return { token: data.access_token, expiry: Date.now() + Number(data.expires_in || 3600) * 1000 - 60000 };
 }
 export async function addDirect(provider, event) {
+    return writeCalendar(provider, event);
+}
+export async function updateDirect(provider, event, binding) {
+    if (!binding || binding.provider !== provider || !binding.id) throw new Error('Choose the calendar linked to this plan.');
+    return writeCalendar(provider, event, binding);
+}
+async function writeCalendar(provider, event, binding = null) {
     if (event.start <= Date.now()) throw new Error('This moment has passed. Choose another time before adding it.');
     if (!configuration(provider)) throw new Error('Use the calendar link to save this activity.');
     if (connecting) throw new Error('A calendar connection is already in progress.');
@@ -149,7 +156,8 @@ export async function addDirect(provider, event) {
         }
         const id = await eventID(event);
         const google = provider === 'google';
-        const url = google ? 'https://www.googleapis.com/calendar/v3/calendars/primary/events' : 'https://graph.microsoft.com/v1.0/me/events';
+        const base = google ? 'https://www.googleapis.com/calendar/v3/calendars/primary/events' : 'https://graph.microsoft.com/v1.0/me/events';
+        const url = binding ? base + '/' + encodeURIComponent(binding.id) : base;
         const body = google ? {
             id, summary: event.title, description: event.description, location: event.location,
             start: { dateTime: iso(event.start), timeZone: event.zone }, end: { dateTime: iso(event.end), timeZone: event.zone }
@@ -159,14 +167,15 @@ export async function addDirect(provider, event) {
             start: { dateTime: iso(event.start).slice(0, -1), timeZone: 'UTC' },
             end: { dateTime: iso(event.end).slice(0, -1), timeZone: 'UTC' }
         };
-        let response = await fetch(url, { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
+        if (binding) { delete body.id; delete body.transactionId; }
+        let response = await fetch(url, { method: binding ? 'PATCH' : 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
             body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
-        if (google && response.status === 409) response = await fetch(url + '/' + id, {
+        if (!binding && google && response.status === 409) response = await fetch(url + '/' + id, {
             headers: { Authorization: 'Bearer ' + session.token }, signal: AbortSignal.timeout(15000)
         });
         if (response.status === 401) sessions.delete(provider);
         if (!response.ok) throw new Error(response.status === 401 ? 'Your calendar connection expired. Please connect again.'
-            : 'The activity could not be added. Try again, or use a calendar link.');
+            : binding ? 'The calendar event could not be updated. Your saved plan has not moved.' : 'The activity could not be added. Try again, or use a calendar link.');
         const saved = await response.json();
         if (!saved.id) throw new Error('The calendar did not confirm this activity. Please check your calendar before retrying.');
         return { id: saved.id, url: saved.htmlLink || saved.webLink || '' };

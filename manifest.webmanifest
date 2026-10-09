@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Jweather — A little time outside",
+  "short_name": "Jweather",
+  "description": "Your forecast, a good moment outside, and a way to make it a plan.",
+  "lang": "en",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f0e9",
+  "theme_color": "#f3f0e9",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -11,6 +11,7 @@ export default defineConfig({
     use: {
         baseURL: 'http://127.0.0.1:8080/Jweather/',
         browserName: 'chromium',
+        serviceWorkers: 'block',
         launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
             ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } : {},
         trace: 'retain-on-failure'

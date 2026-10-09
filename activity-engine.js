@@ -100,7 +100,15 @@ export function findWindows(data, options = {}) {
         for (const start of starts) {
             if (activity === 'sunset' && !(start >= h.start && start < h.start + HOUR)) continue;
             const end = start + duration * 60000;
-            if (start < now + 5 * 60000 || end > now + 72 * HOUR || start < solar.rise || end > solar.set) continue;
+            const horizon = [72, 144].includes(options.horizonHours) ? options.horizonHours : 72;
+            if (start < now + 5 * 60000 || end > now + horizon * HOUR || start < solar.rise || end > solar.set) continue;
+            if (Array.isArray(options.dates) && !options.dates.includes(date)) continue;
+            const weekday = new Date(date + 'T12:00:00Z').getUTCDay();
+            if (Array.isArray(options.weekdays) && !options.weekdays.includes(weekday)) continue;
+            const wallStart = localParts(start, zone).slice(11, 16);
+            const wallEnd = localParts(end, zone).slice(11, 16);
+            if (typeof options.earliest === 'string' && wallStart < options.earliest
+                || typeof options.latest === 'string' && wallEnd > options.latest) continue;
             const localHour = Number(localParts(start, zone).slice(11, 13));
             if (options.period === 'morning' && localHour >= 12 || options.period === 'afternoon' && (localHour < 12 || localHour >= 17)
                 || options.period === 'evening' && localHour < 17) continue;
@@ -130,6 +138,38 @@ export function findWindows(data, options = {}) {
         if (windows.length === 3) break;
     }
     return { windows, incomplete, today, hours, activity };
+}
+export function checkPlan(data, plan, now = Date.now()) {
+    if (plan.end <= now) return { status: 'past', message: 'This moment has passed.' };
+    if (plan.start <= now) return { status: 'ongoing', message: 'Your activity is underway.' };
+    if (data._jweather?.cached) return { status: 'offline', message: 'Saved forecast. Check again for fresh weather.' };
+    const zone = data.timezone;
+    const profile = activities[plan.activity];
+    if (!profile || !Array.isArray(data.hourly?.time) || !Array.isArray(data.daily?.time)) return { status: 'unavailable', message: 'This forecast is incomplete.' };
+    const date = localParts(plan.start, zone).slice(0, 10);
+    const day = data.daily.time.indexOf(date);
+    const rise = localToUTC(data.daily.sunrise?.[day], zone);
+    const set = localToUTC(data.daily.sunset?.[day], zone);
+    if (rise === null || set === null) return { status: 'unavailable', message: 'This plan is outside the current forecast.' };
+    if (plan.start < rise || plan.end > set) return { status: 'changed', message: 'This activity now falls outside daylight.' };
+    const hours = data.hourly.time.map((time, index) => ({ start: localToUTC(time, zone), index }))
+        .filter(h => h.start !== null && h.start < plan.end && h.start + HOUR > plan.start).sort((a, b) => a.start - b.start);
+    if (!hours.length || hours[0].start > plan.start || hours.at(-1).start + HOUR < plan.end
+        || hours.some((h, i) => i && h.start !== hours[i - 1].start + HOUR)) return { status: 'unavailable', message: 'Some hourly readings are missing.' };
+    const readings = hours.map(h => assess(data, h.index, profile, plan.activity));
+    if (readings.some(r => r === null)) return { status: 'unavailable', message: 'Some hourly readings are missing.' };
+    if (readings.some(r => r.score < 55)) {
+        const codes = hours.map(h => data.hourly.weather_code[h.index]);
+        const rain = hours.map(h => reading(data, 'precipitation_probability', h.index));
+        const wind = hours.map(h => reading(data, 'wind_speed_10m', h.index));
+        return { status: 'changed', message: codes.some(c => c >= 95) ? 'Thunderstorms are now forecast.'
+            : rain.some(r => r > 35) ? 'Rain now looks more likely.' : wind.some(w => w > profile.maxWind)
+                ? 'The wind now looks too strong.' : 'Conditions no longer look like a good fit.' };
+    }
+    const window = { ...plan, minTemperature: Math.min(...readings.map(r => r.temperature)), maxTemperature: Math.max(...readings.map(r => r.temperature)),
+        rain: Math.max(...readings.map(r => r.rain)), wind: Math.max(...readings.map(r => r.wind)), gust: Math.max(...readings.map(r => r.gust)),
+        score: Math.min(...readings.map(r => r.score)), zone };
+    return { status: 'good', message: 'Still looks good.', window };
 }
 export function clockTime(instant, zone) {
     return new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(instant);

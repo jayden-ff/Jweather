@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
-    '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.ttf': 'font/ttf', '.png': 'image/png' };
+    '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.ttf': 'font/ttf', '.png': 'image/png',
+    '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 createServer(async (req, res) => {
     try {
         const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);

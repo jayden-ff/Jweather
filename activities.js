@@ -1,5 +1,7 @@
-import { activities, findWindows, clockTime, dayLabel, localParts } from './activity-engine.js?v=20261008.4';
-import { makeEvent, calendarLinks, buildICS, configuration, prepareGoogle, addDirect, disconnectCalendars, hasConnections } from './calendar.js?v=20261008.4';
+import { activities, findWindows, clockTime, dayLabel, localParts } from './activity-engine.js?v=20261008.5';
+import { makeEvent, calendarLinks, buildICS, configuration, prepareGoogle, addDirect, updateDirect, disconnectCalendars, hasConnections } from './calendar.js?v=20261008.5';
+import { getState, savePlan, linkCalendar, hasPersistentStorage, placeKey } from './personal-store.js?v=20261008.5';
+import { sharePlan } from './share-plan.js?v=20261008.5';
 
 const $ = id => document.getElementById(id);
 const section = $('outside-section');
@@ -9,16 +11,25 @@ let chosen;
 let animation;
 let busy = false;
 let event;
+let calendarContext;
 const completed = new Map();
-const preferences = { activity: 'walk', duration: 60, period: 'any', day: 'next' };
+const preferences = { activity: 'walk', duration: 60, period: 'any', day: 'next', useMyHours: null };
+let storedProfileSignature;
 try {
     const saved = JSON.parse(localStorage.getItem('jweather.activities'));
     if (saved && Object.hasOwn(activities, saved.activity)) preferences.activity = saved.activity;
     if ([30, 60, 90].includes(saved?.duration)) preferences.duration = saved.duration;
     if (['any', 'morning', 'afternoon', 'evening'].includes(saved?.period)) preferences.period = saved.period;
+    if (typeof saved?.useMyHours === 'boolean') preferences.useMyHours = saved.useMyHours;
+    storedProfileSignature = saved?.profileSignature;
 } catch { /* Recommendations work without storage. */ }
+const personalProfile = getState().profile;
+if (personalProfile.enabled && storedProfileSignature !== JSON.stringify(personalProfile)) {
+    preferences.activity = personalProfile.activity; preferences.duration = personalProfile.duration;
+    preferences.period = 'any'; preferences.useMyHours = true;
+}
 function save() {
-    try { localStorage.setItem('jweather.activities', JSON.stringify(preferences)); } catch { /* Optional. */ }
+    try { localStorage.setItem('jweather.activities', JSON.stringify({ ...preferences, profileSignature: JSON.stringify(getState().profile) })); } catch { /* Optional. */ }
 }
 function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -61,6 +72,7 @@ function animateMoment() {
 }
 function renderEmpty(incomplete = false) {
     chosen = null;
+    publishMoment();
     const copy = $('moment-copy');
     copy.replaceChildren(el('p', 'moment-badge', 'A little patience'),
         el('h3', 'moment-title', incomplete ? 'A little more data needed.' : 'No comfortable window yet.'),
@@ -100,6 +112,7 @@ function drawTimeline(window) {
 }
 function choose(window) {
     chosen = window;
+    publishMoment();
     const copy = $('moment-copy');
     const day = dayLabel(window.date, result.today);
     const duration = window.duration === 60 ? '1 hour' : window.duration + ' minutes';
@@ -115,7 +128,29 @@ function choose(window) {
     arrow.setAttribute('aria-hidden', 'true');
     add.append(arrow);
     add.addEventListener('click', openCalendar);
-    copy.append(time, list, el('p', 'moment-local', 'Local time in ' + forecast.place.name + '.'), add);
+    const actions = el('div', 'moment-actions');
+    const saved = getState().plans.some(plan => plan.activity === window.activity && plan.start === window.start && plan.end === window.end && placeKey(plan.place) === placeKey(forecast.place));
+    const keep = el('button', 'moment-save', saved ? 'Saved ✓' : 'Save plan');
+    keep.type = 'button'; keep.disabled = saved;
+    const message = el('p', 'journey-status'); message.setAttribute('role', 'status');
+    keep.addEventListener('click', () => {
+        try {
+            savePlan(window, forecast.place); keep.textContent = 'Saved ✓'; keep.disabled = true;
+            message.textContent = hasPersistentStorage() ? 'Saved to your plans below.' : 'Saved for this visit. Browser storage is unavailable.';
+        } catch (error) { message.textContent = error.message; }
+    });
+    const share = el('button', 'moment-save', 'Share');
+    share.type = 'button';
+    share.addEventListener('click', async () => {
+        const plan = { ...window, place: forecast.place };
+        const outcome = await sharePlan(plan, url => {
+            const input = el('input', 'journey-input'); input.value = url; input.readOnly = true; input.setAttribute('aria-label', 'Plan link');
+            message.replaceChildren(input); input.select();
+        });
+        if (!message.querySelector('input')) message.textContent = outcome;
+    });
+    actions.append(add, keep, share);
+    copy.append(time, list, el('p', 'moment-local', 'Local time in ' + forecast.place.name + '.'), actions, message);
     $('moment-visual').hidden = false;
     drawTimeline(window);
     const alternatives = $('moment-alternatives');
@@ -137,11 +172,26 @@ function render() {
     if (!forecast) return;
     const previous = chosen?.start;
     try {
-        result = findWindows(forecast.weather, { ...preferences, period: preferences.activity === 'sunset' ? 'any' : preferences.period });
+        if (forecast.weather._jweather?.cached) {
+            renderEmpty();
+            $('moment-badge')?.remove();
+            const copy = $('moment-copy');
+            copy.querySelector('.moment-title').textContent = 'Reconnect for a fresh moment.';
+            copy.querySelector('.moment-empty').textContent = 'Your last forecast is available below. Activity suggestions need current weather.';
+            return;
+        }
+        const profile = getState().profile;
+        const options = { ...preferences, period: preferences.activity === 'sunset' ? 'any' : preferences.period };
+        if ($('use-my-hours')?.checked && profile.enabled) Object.assign(options, { earliest: profile.from, latest: profile.to, weekdays: profile.weekdays });
+        result = findWindows(forecast.weather, options);
         if (!result.windows.length) renderEmpty(result.incomplete);
         else choose(result.windows.find(window => window.start === previous) || result.windows[0]);
     } catch { renderEmpty(true); }
     requestAnimationFrame(movePill);
+}
+function publishMoment() {
+    window.JweatherMoment = { ...forecast, window: chosen, activity: preferences.activity, duration: preferences.activity === 'sunset' ? 45 : preferences.duration };
+    window.dispatchEvent(new CustomEvent('jweather:moment', { detail: window.JweatherMoment }));
 }
 function calendarOption(container, name, caption, href, provider) {
     const direct = provider && configuration(provider);
@@ -172,6 +222,7 @@ async function connectAndAdd(provider, button) {
         return;
     }
     const pendingEvent = event;
+    const pendingContext = calendarContext;
     busy = true;
     const buttons = [...$('calendar-providers').querySelectorAll('button')];
     buttons.forEach(b => { b.disabled = true; });
@@ -179,10 +230,16 @@ async function connectAndAdd(provider, button) {
     button.setAttribute('aria-busy', 'true');
     $('calendar-status').textContent = 'Connecting to ' + (provider === 'google' ? 'Google Calendar' : 'Outlook') + ' …';
     try {
-        const saved = await addDirect(provider, pendingEvent);
+        const updating = pendingContext.calendar?.provider === provider;
+        const saved = updating ? await updateDirect(provider, pendingEvent, pendingContext.calendar) : await addDirect(provider, pendingEvent);
+        try {
+            const plan = pendingContext.planId ? getState().plans.find(plan => plan.id === pendingContext.planId) : null;
+            const linked = plan || savePlan(pendingContext.window, pendingContext.place);
+            linkCalendar(linked.id, provider, saved.id);
+        } catch { /* A confirmed calendar event must not be reported as a failed save. */ }
         completed.set(key, saved);
         if (event.uid === pendingEvent.uid) {
-            $('calendar-status').replaceChildren(el('span', 'calendar-confirmation', '✓ Added to your calendar.'));
+            $('calendar-status').replaceChildren(el('span', 'calendar-confirmation', updating ? '✓ Calendar event updated.' : '✓ Added to your calendar.'));
             if (/^https:\/\/(calendar\.google\.com|www\.google\.com|outlook\.live\.com|outlook\.office\.com)\//.test(saved.url)) {
                 const link = el('a', 'text-link', 'View event ↗');
                 link.href = saved.url;
@@ -203,13 +260,17 @@ async function connectAndAdd(provider, button) {
         $('calendar-disconnect').hidden = !hasConnections();
     }
 }
-function openCalendar() {
-    if (!chosen || busy) return;
-    event = makeEvent(chosen, forecast.place, reasons(chosen).join(' · '), window.location.href);
+function openCalendar(input = null) {
+    if ((!chosen && !input?.window) || busy) return;
+    calendarContext = input?.window ? input : { window: chosen, place: forecast.place };
+    const moment = calendarContext.window;
+    const date = localParts(moment.start, moment.zone).slice(0, 10);
+    const today = localParts(Date.now(), moment.zone).slice(0, 10);
+    event = makeEvent(moment, calendarContext.place, reasons(moment).join(' · '), window.location.href);
     const preview = $('calendar-preview');
     preview.replaceChildren(el('strong', '', event.title),
-        el('span', '', dayLabel(chosen.date, result.today) + ' · ' + clockTime(chosen.start, chosen.zone) + '–' + clockTime(chosen.end, chosen.zone)),
-        el('span', '', event.location + ' · ' + chosen.zone));
+        el('span', '', dayLabel(date, today) + ' · ' + clockTime(moment.start, moment.zone) + '–' + clockTime(moment.end, moment.zone)),
+        el('span', '', event.location + ' · ' + moment.zone));
     const links = calendarLinks(event);
     const providers = $('calendar-providers');
     providers.replaceChildren();
@@ -226,7 +287,7 @@ function openCalendar() {
         const url = URL.createObjectURL(new Blob([buildICS(event)], { type: 'text/calendar;charset=utf-8' }));
         const link = el('a');
         link.href = url;
-        link.download = 'jweather-' + chosen.activity + '-' + chosen.date + '.ics';
+        link.download = 'jweather-' + moment.activity + '-' + date + '.ics';
         document.body.append(link);
         link.click();
         link.remove();
@@ -235,7 +296,8 @@ function openCalendar() {
     });
     providers.append(download);
     const connected = configuration('google') || configuration('microsoft');
-    $('calendar-explainer').textContent = connected ? 'Connect your account to add this activity automatically. Calendar links and files are available too.'
+    $('calendar-explainer').textContent = calendarContext.calendar ? 'The linked calendar event can be updated after you connect. Calendar links and files create a separate event.'
+        : connected ? 'Connect your account to add this activity automatically. Calendar links and files are available too.'
         : 'The details are ready. Choose your calendar, then save the event there.';
     if (configuration('google')) {
         calendarOption(providers, 'Google Calendar link', 'Open a ready-to-save event instead', links.google);
@@ -277,6 +339,32 @@ $('calendar-disconnect').addEventListener('click', () => {
 });
 window.addEventListener('resize', movePill, { passive: true });
 window.addEventListener('jweather:forecast', e => { forecast = e.detail; render(); });
+window.addEventListener('jweather:open-calendar', e => openCalendar(e.detail));
+window.addEventListener('jweather:activity', e => {
+    if (!Object.hasOwn(activities, e.detail)) return;
+    preferences.activity = e.detail; chosen = null; save(); syncControls(); render();
+});
+let profileSettings = JSON.stringify(getState().profile);
+window.addEventListener('jweather:personal', () => {
+    const profile = getState().profile;
+    const label = $('personal-hours-label');
+    if (label) { label.hidden = !profile.enabled; label.querySelector('span').textContent = 'Use my hours · ' + profile.from + '–' + profile.to; }
+    const next = JSON.stringify(profile);
+    if (next !== profileSettings) {
+        profileSettings = next;
+        if ($('use-my-hours')) $('use-my-hours').checked = profile.enabled;
+        preferences.useMyHours = profile.enabled; preferences.period = 'any';
+        preferences.activity = profile.activity; preferences.duration = profile.duration;
+        chosen = null; save(); syncControls(); render();
+    }
+});
+const hours = $('use-my-hours');
+if (hours) {
+    hours.checked = preferences.useMyHours ?? getState().profile.enabled;
+    const label = $('personal-hours-label'); label.hidden = !getState().profile.enabled;
+    label.querySelector('span').textContent = 'Use my hours · ' + getState().profile.from + '–' + getState().profile.to;
+    hours.addEventListener('change', () => { preferences.useMyHours = hours.checked; save(); chosen = null; render(); });
+}
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !dialog.open) render(); });
 syncControls();
 if (window.JweatherForecast) { forecast = window.JweatherForecast; render(); }

@@ -90,6 +90,10 @@
                 : 'The weather service is unavailable. Please try again later.');
             const data = await response.json();
             if (data.error) throw new Error('No forecast is available for this location right now.');
+            if (new URL(url).hostname === 'api.open-meteo.com') data._jweather = {
+                cached: response.headers.get('X-Jweather-Offline') === '1',
+                savedAt: response.headers.get('X-Jweather-Saved-At') || new Date().toISOString(), url: String(url)
+            };
             return data;
         } catch (error) {
             if (timedOut) throw new Error('The request is taking too long. Please try again.');
@@ -557,6 +561,8 @@
     }
     function setupWeather() {
         place = readPlace();
+        window.addEventListener('jweather:refresh', loadWeather);
+        window.addEventListener('online', () => { if (weather?._jweather?.cached) loadWeather(); });
         syncUnits();
         document.querySelectorAll('[data-unit]').forEach((button) => button.addEventListener('click', () => {
             if (unit === button.dataset.unit) return;

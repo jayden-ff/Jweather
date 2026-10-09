@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Current conditions, the hours ahead, and a five-day forecast.",
+  "description": "Weather, a little time outside, and a way to make it a plan.",
   "scripts": {
     "dev": "node tests/server.mjs",
-    "test": "node --test tests/activities.test.mjs && playwright test",
+    "test": "node --test tests/*.test.mjs && playwright test",
     "test:ui": "playwright test --ui",
     "screenshots": "node tests/screenshots.mjs"
   },

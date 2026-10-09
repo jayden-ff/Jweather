@@ -7,11 +7,18 @@
     <meta name="description" content="Current weather, the hours ahead, and a five-day forecast for wherever you are.">
     <title>Jweather — Weather at a glance.</title>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="preload" href="assets/fonts/dm-sans-regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-regular.ttf" as="font" type="font/ttf" crossorigin>
     <script src="theme.js?v=20261008.3"></script>
-    <link rel="stylesheet" href="weather.css?v=20261008.4">
-    <script src="weather.js?v=20261008.4" defer></script>
+    <link rel="stylesheet" href="weather.css?v=20261008.5">
+    <link rel="stylesheet" href="journey.css?v=20261008.5">
+    <script src="calendar-config.js?v=20261008.5" defer></script>
+    <script type="module" src="journey.js?v=20261008.5"></script>
+    <script type="module" src="app.js?v=20261008.5"></script>
+    <script src="weather.js?v=20261008.5" defer></script>
 </head>
 <body data-page="home">
     <a class="skip-link" href="#main">Skip to content</a>
@@ -65,6 +72,11 @@
                 </svg>
                 <figcaption><span>A view of the sky.<br><strong>A moment outside.</strong></span><span class="art-coordinate" aria-hidden="true">N 38° 43′<br>W 09° 08′</span></figcaption>
             </figure>
+            <section class="myday-section" id="myday-section" aria-labelledby="myday-title">
+                <div class="section-heading"><div><p class="eyebrow"><span class="small-line"></span> My day</p><h2 id="myday-title">A little room for you.</h2></div><button type="button" class="quiet-button" data-edit-profile>Your preferences ↗</button></div>
+                <div class="favorite-links" id="favorite-links"></div><div id="myday-content"></div>
+                <details class="home-plans" id="home-plans"><summary>Your saved plans <span id="home-plans-count"></span></summary><div id="saved-plans"></div></details>
+            </section>
             <section class="places-section reveal" style="--delay:240ms" aria-labelledby="places-title">
                 <div class="section-heading"><h2 id="places-title">Somewhere to start</h2><span>Or anywhere else.</span></div>
                 <div class="place-links">
@@ -75,7 +87,7 @@
             </section>
             <section class="recent-section" id="recent-places" aria-labelledby="recent-title" hidden><h2 class="eyebrow" id="recent-title">Recently viewed</h2><div id="recent-links" class="recent-links"></div></section>
         </main>
-        <footer class="site-footer"><span>Whatever the sky brings.</span><span>Weather by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
+        <footer class="site-footer"><span>Whatever the sky brings.</span><button type="button" class="app-install" data-install-app>Get the app ↗</button><span>Weather by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo ↗</a></span></footer>
     </div>
     <noscript><p class="noscript-note">Please enable JavaScript to search for places and get the forecast.</p></noscript>
 </body>
