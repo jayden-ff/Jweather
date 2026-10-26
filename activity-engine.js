@@ -69,6 +69,9 @@ function assess(data, index, profile, activity) {
         - (activity === 'sunset' ? Math.max(0, cloud - 45) * .5 : 0)));
     return { score, temperature, rain, wind, gust, cloud, uv };
 }
+export function assessHour(data, index, activity = 'walk') {
+    return Object.hasOwn(activities, activity) ? assess(data, index, activities[activity], activity) : null;
+}
 export function findWindows(data, options = {}) {
     const activity = Object.hasOwn(activities, options.activity) ? options.activity : 'walk';
     const profile = activities[activity];
