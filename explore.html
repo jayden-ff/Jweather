@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f3f0e9">
+    <meta name="description" content="Find a real route, see the weather along the way, and choose your moment outside.">
+    <title>A little time outside — Jweather Explore</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <script src="theme.js?v=20261008.3"></script>
+    <link rel="stylesheet" href="weather.css?v=20261026.1">
+    <link rel="stylesheet" href="activities.css?v=20261009.1">
+    <link rel="stylesheet" href="journey.css?v=20261026.1">
+    <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+    <link rel="stylesheet" href="explore-page.css?v=20261026.1">
+    <script src="assets/vendor/leaflet/leaflet.js" defer></script>
+    <script type="module" src="explore-page.js?v=20261026.1"></script>
+    <script type="module" src="app.js?v=20261026.1"></script>
+</head>
+<body data-page="explore">
+    <a class="skip-link" href="#route-details">Skip to route details</a>
+    <header class="explore-header">
+        <a class="wordmark" href="index.html" aria-label="Jweather home"><svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="6"/><path d="M16 2v4m0 20v4M2 16h4m20 0h4M6 6l3 3m14 14 3 3M6 26l3-3M23 9l3-3"/></svg>jweather<span class="wordmark-dot">.</span></a>
+        <span class="explore-header-note">A little change of scenery.</span>
+        <nav aria-label="Explore navigation"><a id="back-to-weather" class="explore-back" href="index.html">← <span>Weather</span></a>
+            <details class="theme-picker"><summary aria-label="Change appearance" title="Change appearance">☼</summary><div class="theme-options" role="group" aria-label="Appearance"><span class="theme-menu-label">Appearance</span><button type="button" data-theme-choice="auto" aria-pressed="true">Automatic</button><button type="button" data-theme-choice="light" aria-pressed="false">Light</button><button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button></div></details>
+        </nav>
+    </header>
+    <main class="explore-workspace" id="main">
+        <section class="explore-map-region" aria-label="Route map">
+            <div id="outdoor-map" aria-label="Map with real routes and hourly weather points"></div>
+            <div class="map-top-controls">
+                <button type="button" id="change-place" class="map-place-button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span id="map-place-name">Find your place</span><span aria-hidden="true">↗</span></button>
+                <div class="map-point-layers" role="group" aria-label="Route weather display"><button type="button" data-layer="weather" aria-pressed="true">Weather</button><button type="button" data-layer="wind" aria-pressed="false">Wind</button><button type="button" data-layer="rain" aria-pressed="false">Rain</button></div>
+            </div>
+            <div class="map-selection-controls"><button type="button" id="set-route-start" aria-pressed="false">Set start</button><button type="button" id="set-route-target" aria-pressed="false">Choose destination</button><button type="button" id="cancel-map-selection" hidden>Cancel</button></div>
+            <p id="map-selection-hint" class="map-selection-hint" role="status" hidden></p>
+            <div class="map-key"><span class="route-key-line"></span> Selected route <span class="map-key-separator">/</span> Hourly forecast points</div>
+        </section>
+        <aside id="route-details" class="explore-sidebar" aria-labelledby="explore-title">
+            <button type="button" id="details-toggle" aria-expanded="true" aria-controls="explore-panel-content"><span class="panel-handle" aria-hidden="true"></span><span>Routes & weather</span><span id="details-toggle-symbol" aria-hidden="true">⌄</span></button>
+            <div id="explore-panel-content">
+                <div class="explore-intro"><p class="eyebrow"><span class="small-line"></span> YOUR TIME OUTSIDE</p><h1 id="explore-title">Find your<br> <em>next little escape.</em></h1><p class="explore-subtitle">A real path. A good moment to take it.</p></div>
+                <div class="explore-preferences"><div class="explore-modes" role="group" aria-label="Route activity"><button type="button" data-mode="walk" aria-pressed="true">Walk</button><button type="button" data-mode="run" aria-pressed="false">Run</button><button type="button" data-mode="cycle" aria-pressed="false">Cycle</button></div><label class="duration-label" for="explore-duration">Time outside<select id="explore-duration"><option value="30">30 min</option><option value="60" selected>60 min</option><option value="90">90 min</option></select></label></div>
+                <p id="explore-status" class="explore-status" role="status">Choose a place to find nearby routes.</p>
+                <button type="button" id="retry-explore" class="quiet-button" hidden>Try again ↻</button>
+                <div id="explore-routes" aria-label="Suggested routes"></div>
+                <section id="selected-route-detail" aria-label="Selected route weather" hidden>
+                    <div class="route-weather-heading"><h2>Along the way.</h2><span id="route-weather-badge"></span></div>
+                    <p class="route-weather-status" role="status" data-status="loading">Checking the hourly weather …</p>
+                    <button type="button" id="retry-route-weather" class="quiet-button" hidden>Retry weather ↻</button>
+                    <ol id="route-weather-stops" aria-label="Estimated passage times and hourly weather"></ol>
+                    <p id="route-data-note" class="route-data-note"></p>
+                    <div class="explore-route-actions"><a id="route-directions" class="quiet-button" target="_blank" rel="noopener noreferrer">Directions ↗</a><button type="button" id="route-gpx" class="quiet-button">Download GPX ↓</button></div>
+                    <button type="button" id="save-route-window" class="explore-save" disabled>Save weather window</button>
+                    <p id="save-reason" class="route-save-note" role="status"></p>
+                </section>
+                <p class="explore-disclaimer">Mapped paths from OpenStreetMap. Check access and local conditions. Moving times are estimates and exclude stops.</p>
+            </div>
+        </aside>
+        <section class="departure-bar" aria-label="Compare departure times"><div class="departure-heading"><label for="departure-day">SET OFF<select id="departure-day" disabled><option>Choose a place</option></select></label><span id="departure-recommendation" role="status">Your moment starts here.</span></div><div id="departure-choices" role="group" aria-label="Departure time"></div><p class="departure-note">Local times · Hourly forecasts at sampled locations, not live radar.</p></section>
+    </main>
+    <noscript><p class="noscript-note">Please enable JavaScript to explore routes.</p></noscript>
+</body>
+</html>

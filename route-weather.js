@@ -45,6 +45,7 @@ export function assessRoute(route, samples, forecasts, start, activity = 'walk')
         if (nearest < 0 || delta > HOUR/2) return unavailable('This route extends beyond the available hourly weather.');
         const reading = assessHour(data,nearest,activity);
         if (reading === null) return unavailable('Some hourly route readings are missing.');
+        if (reading.score < 55 && !worst) worst = 'Conditions at an estimated passage no longer look like a comfortable fit.';
         const hourly = data.hourly;
         points.push({ ...samples[i], at, forecastAt, zone: data.timezone, temperature: hourly.temperature_2m[nearest],
             rain: hourly.precipitation_probability[nearest], wind: hourly.wind_speed_10m[nearest],

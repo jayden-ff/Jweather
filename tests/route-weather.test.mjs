@@ -52,3 +52,7 @@ test('invalid route, activity and nonfinite departure fail closed', () => {
  assert.equal(assessRoute(route,sample(),data(),start,'__proto__').status,'unavailable');
  assert.equal(assessRoute({...route,duration:0},sample(),data(),start,'walk').status,'unavailable');
 });
+test('nearest passage hour cannot show adverse weather while the route is recommended', () => {
+ const short={...route,duration:2700};const f=data();f[4].hourly.precipitation_probability[16]=90;
+ const a=assessRoute(short,sampleRoute(short),f,start,'walk');assert.equal(a.points.at(-1).rain,90);assert.equal(a.status,'changed');
+});
