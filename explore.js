@@ -1,3 +1,4 @@
+import { exploreURL } from './explore-link.js?v=20261026.1';
 import { el, button, externalLink, placeURL } from './ui.js?v=20261009.1';
 import { nearbyDestinations, rankDestinations, routeTo, routeGPX, directionsURL, distanceBetween } from './route-service.js?v=20261009.1';
 import { getState, placeKey, savePlan, hasPersistentStorage } from './personal-store.js?v=20261009.1';
@@ -22,7 +23,8 @@ export function createExplorer(container, getContext) {
     const header = el('div', 'explore-heading');
     header.append(el('h3', '', 'A little change of scenery.'), el('p', 'journey-note', 'Nearby parks, real paths, and a way back.'));
     const moment = el('p', 'map-moment'); moment.setAttribute('role', 'status');
-    header.append(moment);
+    const fullMap = el('a', 'full-map-link', 'Open full map ↗');
+    header.append(moment, fullMap);
     const toolbar = el('div', 'map-toolbar');
     const modes = el('div', 'route-modes'); modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Route activity');
     const modeButtons = [];
@@ -208,6 +210,7 @@ export function createExplorer(container, getContext) {
     }
     function update() {
         const context = getContext();
+        if (context) fullMap.href = exploreURL(context);
         list.querySelectorAll('.route-card').forEach(card => syncCard(card, context));
         if (!context?.window) { moment.textContent = 'Choose a weather window above to make it a plan.'; return; }
         const window = context.window;

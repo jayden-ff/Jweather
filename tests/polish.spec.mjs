@@ -50,27 +50,27 @@ test('removing and undoing a plan preserves its calendar link and keeps save con
     await expect(page.getByRole('button', { name: 'Check weather ↻', exact: true })).toBeFocused();
 });
 
-test('Find a route follows the selected activity even after the map has already been used', async ({ page }) => {
+test('Find a route carries the selected activity to the independent map', async ({ page }) => {
     const calls = await maps(page);
     await open(page);
     await page.getByRole('button', { name: 'Find a route', exact: true }).click();
-    await expect(page.locator('#map-tab')).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('.route-card')).toHaveCount(2);
-    await expect(page.locator('.route-select').first()).toHaveAttribute('aria-pressed', 'true');
-    await page.locator('.route-select').nth(1).click();
-    await expect(page.locator('.route-select').nth(1)).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.route-select').first()).toHaveAttribute('aria-pressed', 'false');
+    await expect(page).toHaveURL(/explore.html/);
+    await expect(page.locator('.explore-route')).toHaveCount(2);
+    await page.locator('.explore-route').nth(1).click();
+    await expect(page.locator('.explore-route').nth(1)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.explore-route').first()).toHaveAttribute('aria-pressed', 'false');
+    await page.locator('#back-to-weather').click();
     await page.locator('[data-activity-choice="cycle"]').click();
     await page.getByRole('button', { name: 'Find a route', exact: true }).click();
-    await expect(page.getByRole('group', { name: 'Route activity' }).getByRole('button', { name: 'Cycle', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('.route-card')).toHaveCount(2);
+    await expect(page.locator('[data-mode="cycle"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.explore-route')).toHaveCount(2);
     expect(calls.some(url => url.includes('/routed-bike/'))).toBe(true);
 });
 
 test('route saving updates when the available weather window changes', async ({ page }) => {
     const calls = await maps(page, 4200);
     await open(page);
-    await page.getByRole('button', { name: 'Find a route', exact: true }).click();
+    await page.locator('#map-tab').click();
     await expect(page.locator('.route-card')).toHaveCount(2);
     await expect(page.locator('.route-save').first()).toBeDisabled();
     await expect(page.locator('.route-fit').first()).toContainText('70 minutes');
@@ -126,9 +126,9 @@ test('personal hours keep their preset label accurate and sunset has its own dur
 
 test.describe('touch interface', () => {
     test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-    test('the map permits page scrolling and point selection can be cancelled', async ({ page }) => {
+    test('the inline map permits page scrolling and point selection can be cancelled', async ({ page }) => {
         await maps(page); await open(page);
-        await page.getByRole('button', { name: 'Find a route', exact: true }).click();
+        await page.locator('#map-tab').click();
         await expect(page.locator('.route-card')).toHaveCount(2);
         const map = page.locator('#outdoor-map');
         await expect(map).not.toHaveClass(/leaflet-touch-drag/);

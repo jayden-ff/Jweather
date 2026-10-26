@@ -51,3 +51,15 @@ Calendar callbacks, sign-in endpoints, authenticated requests, access tokens, ma
 `npm test` runs computations and browser tests beneath `/Jweather/`. Browser checks use deterministic forecasts, park and route responses and simulated calendar providers. PWA tests allow the real service worker and take the browser offline. Mobile checks cover 320, 390, 768 and 1440 px in both themes, with reduced motion, plus landscape dialogs, long names, keyboard selection, undo and touch scrolling over the map.
 
 Documentation screenshots use example weather. `tests/map-example.json` contains two actual Berlin routes fetched from FOSSGIS and park coordinates from Overpass on 9 October 2026. The optional map capture fetches only the visible OpenStreetMap tiles; attribution stays in the image.
+
+## Full Explore map
+
+**Find a route** opens the dedicated `explore.html` view with the chosen place, activity, local weather window and duration. **Explore map** in the forecast header opens the same view. The smaller **Quick map** tab remains as a preview.
+
+The full view keeps route choices beside the map on desktop and in a collapsible panel on phones. Choose a start or destination on the map, change activity, open directions or download the actual GPX. Routes currently go out and back; round-trip loop generation is not included.
+
+Up to five distance-spaced points carry estimated passage times. Repeated coordinates on the return journey reuse forecast downloads but are assessed at their different passage times. The map shows distinct locations; the details list shows all five passages. Weather, Wind and Rain switches change these point labels, not a radar or a continuous weather overlay. Wind direction appears only when supplied.
+
+Departure choices use the destination's local dates and exclude ambiguous DST hours, past starts and routes outside the forecast horizon. The highlighted best time is only the best of the compared departures for the selected route. Choosing another time reuses the downloaded hourly data. Weather is checked conservatively across the full moving interval at each sampled location; passage readings show the nearest hourly forecast and retain its source time. Conditions between samples can differ, and hourly forecasts do not imply minute-by-minute precision.
+
+**Save weather window** saves an activity in My plans, not the route geometry. The whole moving time must fit the chosen 30-, 60- or 90-minute window, route weather must be fresh and suitable, and the complete saved interval must also pass the existing place-level checks. Use GPX to retain the actual path. Missing/cached weather disables new recommendations and saving; route directions and exports remain available when already loaded. Maps and routing require a connection.

@@ -1,9 +1,10 @@
+import { exploreURL } from './explore-link.js?v=20261026.1';
 import { getState, toggleFavorite, hasPersistentStorage, placeKey } from './personal-store.js?v=20261009.1';
 import { rememberForecast } from './forecast-api.js?v=20261009.1';
 import { editProfile } from './profile.js?v=20261009.1';
 import { initMyDay } from './myday.js?v=20261009.1';
 import { initPlans, renderPlans, renderSharedPlan } from './plans.js?v=20261009.1';
-import { createExplorer } from './explore.js?v=20261009.1';
+import { createExplorer } from './explore.js?v=20261026.1';
 import { createComparison } from './compare.js?v=20261009.1';
 
 let forecast = window.JweatherForecast;
@@ -30,13 +31,19 @@ document.getElementById('favorite-place')?.addEventListener('click', () => {
 });
 window.addEventListener('jweather:personal', syncFavorite);
 window.addEventListener('jweather:personal', () => { explorer?.update(); comparison?.syncSaved(); });
+function syncExploreLink() {
+    const current = context();
+    const link = document.getElementById('open-explore');
+    if (current && link) link.href = exploreURL(current);
+}
 function receiveForecast(value) {
     forecast = value;
     rememberForecast(value.place, value.weather);
-    syncFavorite(); renderSharedPlan(value); renderPlans();
+    syncFavorite(); syncExploreLink(); renderSharedPlan(value); renderPlans();
 }
 window.addEventListener('jweather:forecast', event => receiveForecast(event.detail));
 window.addEventListener('jweather:moment', () => {
+    syncExploreLink();
     explorer?.update();
     if (active === 'compare') comparison?.update();
 });
@@ -59,9 +66,8 @@ function openTab(value, focus = false) {
     }
 }
 window.addEventListener('jweather:explore', () => {
-    openTab('map', true);
-    document.getElementById('workspace')?.scrollIntoView({ block: 'start',
-        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    const current = context();
+    if (current) window.location.assign(exploreURL(current));
 });
 tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => openTab(tab.dataset.workspace));

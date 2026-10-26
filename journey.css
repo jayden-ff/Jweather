@@ -239,3 +239,10 @@ button:disabled { cursor: default; opacity: .65; }
     .feedback-toast { animation: none; }
     .moment-route span { transition: none; }
 }
+
+.full-map-link { display: inline-flex; align-items: center; padding: 11px 18px; margin: 12px 0 8px; min-height: 44px; border-radius: 24px; background: var(--ink); color: var(--paper); font-size: 12px; }
+.full-map-link:hover { background: var(--button-hover); }
+
+.header-explore-link { font-size: 12px; padding: 9px 14px; min-height: 40px; border: 1px solid var(--line); border-radius: 22px; display: inline-flex; align-items: center; white-space: nowrap; }
+.header-explore-link:hover { background: var(--panel); }
+@media (max-width: 600px) { .header-explore-link { font-size: 10px; padding: 8px 10px; } .header-actions:has(.header-explore-link) { gap: 10px; } .header-actions:has(.header-explore-link) .back-link { display: none; } }

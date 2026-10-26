@@ -40,6 +40,8 @@ Optional Google and Microsoft connections can create the event directly after ac
 
 ![Explore — an OpenStreetMap view of Berlin and two suggested routes](docs/screenshots/explore.png)
 
+**Explore map** opens a dedicated large map with routes beside it on desktop and an expandable details panel on phones. Hourly weather at up to five sampled locations follows estimated passage times; compare departure times without repeated weather downloads. Switch between weather, wind and rain point labels. The full route must fit the chosen activity window before saving. These are sampled forecasts, not radar or street-level guarantees. GPX keeps the path; My plans keeps the weather window.
+
 **Share** sends a link with the place, activity and absolute start time. Someone else can open it, check the forecast and save the same moment. Calendar connections and event IDs stay private.
 
 ## Keep it close
