@@ -20,7 +20,7 @@ export function localParts(instant, zone) {
     const parts = Object.fromEntries(formatter(zone).formatToParts(new Date(instant)).map(p => [p.type, p.value]));
     return parts.year + '-' + parts.month + '-' + parts.day + 'T' + parts.hour + ':' + parts.minute + ':' + parts.second;
 }
-export function localToUTC(wallTime, zone) {
+function convertLocalToUTC(wallTime, zone) {
     if (typeof wallTime !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(wallTime)) return null;
     const target = wallTime.length === 16 ? wallTime + ':00' : wallTime;
     const nominal = Date.parse(target + 'Z');
@@ -39,6 +39,18 @@ export function localToUTC(wallTime, zone) {
         }
         return matches.length === 1 ? matches[0] : null;
     } catch { return null; }
+}
+// Time-zone conversion is deterministic and shared by every route/departure comparison.
+// Bound this cache even when a long-lived tab explores many destinations.
+const localInstants = new Map();
+export function localToUTC(wallTime, zone) {
+    if (typeof wallTime !== 'string' || typeof zone !== 'string') return null;
+    const key = zone + '\0' + wallTime;
+    if (!localInstants.has(key)) {
+        if (localInstants.size >= 4096) localInstants.delete(localInstants.keys().next().value);
+        localInstants.set(key, convertLocalToUTC(wallTime, zone));
+    }
+    return localInstants.get(key);
 }
 function reading(data, key, index) {
     const value = data.hourly[key]?.[index];

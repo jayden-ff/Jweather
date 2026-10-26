@@ -56,3 +56,8 @@ test('nearest passage hour cannot show adverse weather while the route is recomm
  const short={...route,duration:2700};const f=data();f[4].hourly.precipitation_probability[16]=90;
  const a=assessRoute(short,sampleRoute(short),f,start,'walk');assert.equal(a.points.at(-1).rain,90);assert.equal(a.status,'changed');
 });
+test('a complete day comparison reuses timezone conversions and stays interactive', () => {
+ const f=data();const s=sample();const times=departureOptions(f[0],route,'2026-10-09',now);
+ const before=performance.now();for(const t of times)assessRoute(route,s,f,t,'walk');
+ assert.ok(performance.now()-before<1500,'A 48-departure comparison must finish within 1.5 seconds, not block the interface for many seconds.');
+});

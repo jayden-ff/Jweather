@@ -64,3 +64,32 @@ test('weather header exposes full Explore map without opening the inline preview
  await setup(page);await page.goto(placePath);
  await page.getByRole('link',{name:'Explore map',exact:true}).click();await expect(page).toHaveURL(/explore.html/);await expect(page.locator('.explore-route')).toHaveCount(2);
 });
+test('offline time changes never restore a recommendation or enable saving',async({page,context})=>{
+ await setup(page);await page.goto(path);await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','good');
+ await context.setOffline(true);await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','offline');
+ await page.getByRole('button',{name:'15:30',exact:true}).click();
+ await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','offline');
+ await expect(page.locator('#save-route-window')).toBeDisabled();await expect(page.locator('#departure-recommendation')).toContainText('Reconnect');
+ await context.setOffline(false);await page.locator('#retry-route-weather').click();
+ await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','good');
+});
+test('custom start and destination can be selected with map keyboard controls',async({page})=>{
+ await setup(page);await page.goto(path);await expect(page.locator('.explore-route')).toHaveCount(2);
+ await page.locator('#set-route-target').focus();await page.keyboard.press('Enter');
+ await page.locator('#outdoor-map').focus();await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');
+ await expect(page.locator('.explore-route')).toHaveCount(1);await expect(page.locator('.explore-route')).toContainText('Your destination');
+ await page.locator('#set-route-start').click();await page.locator('#outdoor-map').focus();await page.keyboard.press('ArrowLeft');await page.keyboard.press('Enter');
+ await expect(page.locator('#set-route-start')).toHaveAttribute('aria-pressed','false');await expect(page.locator('.explore-route')).toHaveCount(2);
+});
+for(const viewport of [{width:320,height:568},{width:844,height:390}])test(`departure controls stay on screen at ${viewport.width}x${viewport.height}`,async({page})=>{
+ await page.setViewportSize(viewport);await setup(page);await page.goto(path);await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','good');
+ const departure=await page.locator('.departure-bar').boundingBox();expect(departure.y+departure.height).toBeLessThanOrEqual(viewport.height);
+});
+test('selected route stays inside mobile map when the details panel changes height',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await setup(page);
+ const longer={elements:[{id:101,center:{lat:52.545,lon:13.405},tags:{name:'Long park',leisure:'park'}}]};
+ await page.route('https://overpass-api.de/**',r=>r.fulfill({json:longer}));await page.goto(path);
+ await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','good');
+ await page.locator('#details-toggle').click();await page.locator('#details-toggle').click();
+ await expect.poll(async()=>{const map=await page.locator('#outdoor-map').boundingBox(),route=await page.locator('.selected-route-line').boundingBox();return route.y>=map.y+45&&route.y+route.height<=map.y+map.height-20;}).toBe(true);
+});

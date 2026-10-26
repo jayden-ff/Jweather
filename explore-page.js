@@ -44,8 +44,12 @@ function selectMode(value) {
     $('set-route-target').setAttribute('aria-pressed',String(mode==='destination'));
     $('cancel-map-selection').hidden=!mode;
     $('map-selection-hint').hidden=!mode;
-    $('map-selection-hint').textContent=mode==='start'?'Tap the map to choose a nearby starting point.':'Tap the map to choose a destination. Your route will return to the start.';
-    if(map)map.getContainer().style.cursor=mode?'crosshair':'';
+    $('map-selection-hint').textContent=mode ? (mode==='start'?'Choose a starting point. ':'Choose a destination. ')+'Tap the map, or move its center with arrow keys and press Enter. Escape cancels.' : '';
+    if(map) {
+        map.getContainer().style.cursor=mode?'crosshair':'';
+        map.getContainer().classList.toggle('map-selection-active',!!mode);
+        if(mode)map.getContainer().focus({preventScroll:true});
+    }
 }
 $('set-route-start').addEventListener('click',()=>selectMode(mode==='start'?'':'start'));
 $('set-route-target').addEventListener('click',()=>selectMode(mode==='destination'?'':'destination'));
@@ -60,15 +64,25 @@ function initialiseMap() {
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'})
         .on('tileerror',()=>status('Some map tiles could not load. Route details remain available.')).addTo(map);
     weatherMarkers=L.layerGroup().addTo(map);routeLayers=L.layerGroup().addTo(map);
-    map.on('click',event=>{
+    const commitPoint=latlng=>{
         if(!mode || routesBusy)return;
-        const destination={latitude:event.latlng.lat,longitude:event.latlng.lng,name:mode==='start'?'Your starting point':'Your destination'};
+        const destination={latitude:latlng.lat,longitude:latlng.lng,name:mode==='start'?'Your starting point':'Your destination'};
         if(distanceBetween(place,destination)>20000 || distanceBetween(origin,destination)>20000){$('map-selection-hint').textContent='Choose a point within 20 km, or search for another place.';return;}
         const selectedMode=mode;selectMode('');
         if(selectedMode==='start'){origin=destination;loadRoutes();}
         else loadRoutes(destination);
-    });
-    const observer=new ResizeObserver(()=>map.invalidateSize({pan:false}));observer.observe($('outdoor-map'));
+    };
+    map.on('click',event=>commitPoint(event.latlng));
+    map.getContainer().addEventListener('keydown',event=>{
+        if(!mode)return;
+        const delta={ArrowLeft:[-70,0],ArrowRight:[70,0],ArrowUp:[0,-70],ArrowDown:[0,70]}[event.key];
+        if(delta || event.key==='Enter') {
+            event.preventDefault();event.stopImmediatePropagation();
+            if(delta)map.panBy(delta,{animate:false});
+            else commitPoint(map.getCenter());
+        }
+    },true);
+    const observer=new ResizeObserver(()=>{map.invalidateSize({pan:false});fitSelectedRoute();});observer.observe($('outdoor-map'));
 }
 function drawRoutes(fit=false) {
     if(!map)return;
@@ -77,10 +91,17 @@ function drawRoutes(fit=false) {
     if(!selectedRoute)return;
     const coordinates=selectedRoute.coordinates.map(p=>[p[1],p[0]]);
     L.polyline(coordinates,{color:'#fffaf0',weight:10,opacity:.96,interactive:false}).addTo(routeLayers);
-    const path=L.polyline(coordinates,{color:'#ce683c',weight:5,opacity:1,className:'selected-route-line'}).addTo(routeLayers);
+    L.polyline(coordinates,{color:'#ce683c',weight:5,opacity:1,className:'selected-route-line'}).addTo(routeLayers);
     originMarker?.remove();
     originMarker=L.circleMarker(coordinates[0],{radius:7,color:'#faf8f3',weight:3,fillColor:'#333c2e',fillOpacity:1}).bindTooltip(el('span','',origin.name)).addTo(map);
-    if(fit)map.fitBounds(path.getBounds(),{paddingTopLeft:[70,145],paddingBottomRight:[75,75],maxZoom:15,animate:false});
+    if(fit)fitSelectedRoute();
+}
+function fitSelectedRoute() {
+    if(!map || !selectedRoute)return;
+    const height=map.getSize().y;
+    const bounds=window.L.latLngBounds(selectedRoute.coordinates.map(p=>[p[1],p[0]]));
+    map.fitBounds(bounds,{paddingTopLeft:[60,Math.min(145,Math.round(height*.35))],
+        paddingBottomRight:[55,Math.min(75,Math.round(height*.16))],maxZoom:15,animate:false});
 }
 async function loadPlace(next) {
     place=next;origin={...next};const generation=++dataGeneration;
@@ -155,6 +176,7 @@ async function chooseRoute(route, fresh=false) {
     $('route-weather-stops').replaceChildren();$('route-weather-badge').textContent='';$('route-data-note').textContent='';$('retry-route-weather').hidden=true;
     $('save-route-window').disabled=true;$('save-reason').textContent='Waiting for fresh route weather.';
     renderDepartures();
+    if(!navigator.onLine){markOffline();return;}
     if(!samples.length){setWeatherStatus('unavailable','This route cannot be sampled. Routes must take less than three hours.');return;}
     try {
         let pending=routeData.get(route);
@@ -184,7 +206,7 @@ function renderDepartures() {
         start=choices.includes(suggested)?suggested:choices.find(t=>Number(localParts(t,cityWeather.timezone).slice(11,13))>=9)||choices[0]||NaN;
     }
     // Re-evaluating uses in-memory hourly data, never another request per time button.
-    const scored=pointForecasts.length===samples.length?choices.map(time=>({time,result:assessRoute(selectedRoute,samples,pointForecasts,time,activity)})):[];
+    const scored=navigator.onLine&&pointForecasts.length===samples.length?choices.map(time=>({time,result:assessRoute(selectedRoute,samples,pointForecasts,time,activity)})):[];
     const good=scored.filter(c=>c.result.status==='good').sort((a,b)=>b.result.score-a.result.score||a.time-b.time);
     const best=good[0]?.time;
     $('departure-choices').replaceChildren(...choices.map(time=>{
@@ -192,7 +214,7 @@ function renderDepartures() {
         b.dataset.at=String(time);b.setAttribute('aria-pressed',String(time===start));
         b.dataset.best=String(time===best);if(time===best)b.title='Best of the compared departures for this route';return b;
     }));
-    $('departure-recommendation').textContent=best?`${clockTime(best,cityWeather.timezone)} · best compared departure`:choices.length?(pointForecasts.length?'No comfortable departure found.':'Comparing hourly conditions …'):'No departure available for this day.';
+    $('departure-recommendation').textContent=!navigator.onLine?'Reconnect to compare.':best?`${clockTime(best,cityWeather.timezone)} · best compared departure`:choices.length?(pointForecasts.length?'No comfortable departure found.':'Comparing hourly conditions …'):'No departure available for this day.';
     if(!choices.length)setWeatherStatus('unavailable','No departure fits within the available forecast. Choose another day or a shorter route.');
     syncURL();updateDepartureSelection(true);
 }
@@ -201,7 +223,9 @@ function updateDepartureSelection(scroll=false) {
     if(scroll){const b=controls.find(b=>Number(b.dataset.at)===start);if(b){const parent=$('departure-choices');parent.scrollLeft=Math.max(0,b.offsetLeft-parent.offsetLeft-parent.clientWidth/2+b.offsetWidth/2);}}
 }
 function evaluateDeparture() {
-    if(!selectedRoute||!pointForecasts.length)return;
+    if(!selectedRoute)return;
+    if(!navigator.onLine){markOffline();return;}
+    if(!pointForecasts.length)return;
     assessment=assessRoute(selectedRoute,samples,pointForecasts,start,activity);
     setWeatherStatus(assessment.status,assessment.reason);
     $('route-weather-badge').textContent=assessment.status==='good'?'Looks good':assessment.status==='changed'?'Check conditions':'';
@@ -222,7 +246,7 @@ function drawWeatherPoints() {
     const points=assessment?.points||[];
     $('route-weather-stops').replaceChildren(...points.map((p,i)=>{
         const li=el('li','weather-stop');li.append(el('span','stop-dot'));
-        const label=el('div','stop-label',`${clockTime(p.at,p.zone)} · ${i===0?'Set off':i===points.length-1?'Back at the start':i===2?'Turning point':'On the way'}`);
+        const label=el('div','stop-label',`${clockTime(p.at,p.zone)} · ${i===0?'Set off':i===points.length-1?'Back at the start':i===2?'Halfway along':'On the way'}`);
         label.append(el('small','',`Hourly forecast ${clockTime(p.forecastAt,p.zone)}`));
         const reading=el('div','stop-conditions',`${Math.round(p.temperature)}°C · ${Math.round(p.rain)}% rain`);reading.append(el('small','',`${Math.round(p.wind)} km/h wind`));li.append(label,reading);return li;
     }));
@@ -239,6 +263,7 @@ function drawWeatherPoints() {
 }
 function syncSave() {
     selectedWindow=null;const save=$('save-route-window');save.disabled=true;save.textContent='Save weather window';
+    if(!navigator.onLine){$('save-reason').textContent='Reconnect for fresh weather before saving a new time.';return;}
     if(!selectedRoute||!Number.isFinite(start)){$('save-reason').textContent='Choose a route and departure first.';return;}
     if(selectedRoute.duration>minutes*60){$('save-reason').textContent=`This route takes about ${Math.ceil(selectedRoute.duration/60)} min. Choose more time outside or a shorter route.`;return;}
     if(assessment?.status!=='good'){$('save-reason').textContent='A fresh, comfortable route forecast is needed to save this time.';return;}
@@ -257,7 +282,15 @@ $('save-route-window').addEventListener('click',()=>{
     try {savePlan(selectedWindow,place);syncSave();if(!hasPersistentStorage())$('save-reason').textContent='Saved for this visit. Browser storage is unavailable.';}catch(error){$('save-reason').textContent=error.message;}
 });
 window.addEventListener('jweather:personal',syncSave);
-window.addEventListener('offline',()=>{++weatherGeneration;assessment=null;weatherMarkers?.clearLayers();if(selectedRoute){setWeatherStatus('offline','You are offline. Reconnect for fresh route weather.');$('retry-route-weather').hidden=false;syncSave();}});
+function markOffline() {
+    ++weatherGeneration;assessment=null;pointForecasts=[];selectedWindow=null;
+    weatherMarkers?.clearLayers();$('route-weather-stops').replaceChildren();$('route-weather-badge').textContent='';
+    $('departure-recommendation').textContent='Reconnect to compare.';
+    document.querySelectorAll('.departure-choice').forEach(b=>b.dataset.best='false');
+    if(selectedRoute){setWeatherStatus('offline','You are offline. Reconnect for fresh route weather.');$('retry-route-weather').hidden=false;}
+    syncSave();
+}
+window.addEventListener('offline',markOffline);
 $('route-gpx').addEventListener('click',()=>{
     if(!selectedRoute)return;
     const url=URL.createObjectURL(new Blob([routeGPX(selectedRoute)],{type:'application/gpx+xml'}));const a=el('a');a.href=url;a.download='jweather-route.gpx';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);

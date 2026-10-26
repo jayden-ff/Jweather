@@ -25,20 +25,20 @@
 ### Task 1: Deterministic route weather
 Files: create route-weather.js, tests/route-weather.test.mjs; modify activity-engine.js and forecast-api.js.
 Interfaces: sampleRoute(route) returns <=5 {latitude,longitude,fraction}; assessRoute(route,samples,forecasts,start,activity) returns status, points, score, reason; departureOptions(data,route,day,now) returns absolute start values. Reuse existing comfort assessment via exported assessHour(data,index,activity).
-- [ ] Add tests for repeated-coordinate timing, full-hour coverage, missing readings, cached forecasts, weather deterioration, DST and forecast horizon; run to see failure.
-- [ ] Implement helpers and add hourly wind direction to API parameters.
-- [ ] Run node --test tests/route-weather.test.mjs and all existing node tests; commit.
+- [x] Add tests for repeated-coordinate timing, full-hour coverage, missing readings, cached forecasts, weather deterioration, DST and forecast horizon; run to see failure.
+- [x] Implement helpers and add hourly wind direction to API parameters.
+- [x] Run node --test tests/route-weather.test.mjs and all existing node tests; commit.
 
 ### Task 2: Dedicated responsive map
 Files: create explore.html, explore-page.js, explore-page.css, tests/explore-page.spec.mjs.
 Interfaces: URL lat,lon,name,country,activity,at,minutes conveys existing selection; route-service.js supplies real routes; fetchForecast supplies per-sample data. New page initializes Leaflet directly, renders route choices and departure buttons, assessment markers and accessible mobile details panel.
-- [ ] Add tests for direct entry, selected activity/time, departure changes without extra weather requests, API failures and whole-route save gating; run to see failure.
-- [ ] Implement full-height desktop sidebar/map/time controls and mobile panel, start/destination selection, mode switching, route exports and assessment. Use textContent-safe labels.
-- [ ] Verify targeted Playwright tests at 320,390,768,1440 pixels with keyboard, dark mode and reduced motion; commit.
+- [x] Add tests for direct entry, selected activity/time, departure changes without extra weather requests, API failures and whole-route save gating; run to see failure.
+- [x] Implement full-height desktop sidebar/map/time controls and mobile panel, start/destination selection, mode switching, route exports and assessment. Use textContent-safe labels.
+- [x] Verify targeted Playwright tests at 320,390,768,1440 pixels with keyboard, dark mode and reduced motion; commit.
 
 ### Task 3: Integrate and validate
 Files: modify explore.js, journey.js, weather.html, service-worker.js, README.md, docs/plans.md; add entry link helper if needed.
-- [ ] Add test proving existing Find a route and Explore entries link to the full page with context; run to see failure.
-- [ ] Preserve old tab behavior for compatibility while adding prominent full-map entry and navigate Find a route to new page. Update shell cache and query versions; document actual behavior.
-- [ ] Run full npm test with system Chromium; inspect desktop/mobile screenshots and new page accessibility/overflow; commit.
-- [ ] Request independent whole-branch review and fix important findings with regression coverage; final verification and report.
+- [x] Add test proving existing Find a route and Explore entries link to the full page with context; run to see failure.
+- [x] Preserve old tab behavior for compatibility while adding prominent full-map entry and navigate Find a route to new page. Update shell cache and query versions; document actual behavior.
+- [x] Run full npm test with system Chromium; inspect desktop/mobile screenshots and new page accessibility/overflow; commit.
+- [x] Request independent whole-branch review and fix important findings with regression coverage; final verification and report.
