@@ -23,7 +23,7 @@ export function createExplorer(container, getContext) {
     const header = el('div', 'explore-heading');
     header.append(el('h3', '', 'A little change of scenery.'), el('p', 'journey-note', 'Nearby parks, real paths, and a way back.'));
     const moment = el('p', 'map-moment'); moment.setAttribute('role', 'status');
-    const fullMap = el('a', 'full-map-link', 'Open full map ↗');
+    const fullMap = el('a', 'full-map-link', 'Open route planner');
     header.append(moment, fullMap);
     const toolbar = el('div', 'map-toolbar');
     const modes = el('div', 'route-modes'); modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Route activity');

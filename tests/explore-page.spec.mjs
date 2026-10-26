@@ -60,9 +60,13 @@ test('route entry opens dedicated page with current weather-window context',asyn
  await setup(page);await page.goto(placePath);await page.getByRole('button',{name:'Find a route',exact:true}).click();
  await expect(page).toHaveURL(/explore.html.*activity=walk/);await expect(page.locator('.explore-route')).toHaveCount(2);
 });
-test('weather header exposes full Explore map without opening the inline preview',async({page})=>{
+test('weather stays primary and routes remain available as an optional tool',async({page})=>{
  await setup(page);await page.goto(placePath);
- await page.getByRole('link',{name:'Explore map',exact:true}).click();await expect(page).toHaveURL(/explore.html/);await expect(page.locator('.explore-route')).toHaveCount(2);
+ await expect(page.locator('.site-header')).not.toContainText('Explore map');
+ await expect(page.locator('#map-panel')).toBeHidden();
+ await page.locator('#map-tab').click();
+ await page.getByRole('link',{name:'Open route planner',exact:true}).click();
+ await expect(page).toHaveURL(/explore.html/);await expect(page.locator('.explore-route')).toHaveCount(2);
 });
 test('offline time changes never restore a recommendation or enable saving',async({page,context})=>{
  await setup(page);await page.goto(path);await expect(page.locator('.route-weather-status')).toHaveAttribute('data-status','good');

@@ -4,7 +4,7 @@ import { rememberForecast } from './forecast-api.js?v=20261009.1';
 import { editProfile } from './profile.js?v=20261009.1';
 import { initMyDay } from './myday.js?v=20261009.1';
 import { initPlans, renderPlans, renderSharedPlan } from './plans.js?v=20261009.1';
-import { createExplorer } from './explore.js?v=20261026.1';
+import { createExplorer } from './explore.js?v=20261026.2';
 import { createComparison } from './compare.js?v=20261009.1';
 
 let forecast = window.JweatherForecast;
@@ -31,19 +31,13 @@ document.getElementById('favorite-place')?.addEventListener('click', () => {
 });
 window.addEventListener('jweather:personal', syncFavorite);
 window.addEventListener('jweather:personal', () => { explorer?.update(); comparison?.syncSaved(); });
-function syncExploreLink() {
-    const current = context();
-    const link = document.getElementById('open-explore');
-    if (current && link) link.href = exploreURL(current);
-}
 function receiveForecast(value) {
     forecast = value;
     rememberForecast(value.place, value.weather);
-    syncFavorite(); syncExploreLink(); renderSharedPlan(value); renderPlans();
+    syncFavorite(); renderSharedPlan(value); renderPlans();
 }
 window.addEventListener('jweather:forecast', event => receiveForecast(event.detail));
 window.addEventListener('jweather:moment', () => {
-    syncExploreLink();
     explorer?.update();
     if (active === 'compare') comparison?.update();
 });

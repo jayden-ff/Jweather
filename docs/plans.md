@@ -54,7 +54,7 @@ Documentation screenshots use example weather. `tests/map-example.json` contains
 
 ## Full Explore map
 
-**Find a route** opens the dedicated `explore.html` view with the chosen place, activity, local weather window and duration. **Explore map** in the forecast header opens the same view. The smaller **Quick map** tab remains as a preview.
+**Find a route** opens the dedicated `explore.html` view with the chosen place, activity, local weather window and duration. The optional **Routes** tab offers a quiet **Open route planner** text link. The forecast header stays focused on weather.
 
 The full view keeps route choices beside the map on desktop and in a collapsible panel on phones. Choose a start or destination on the map, change activity, open directions or download the actual GPX. Routes currently go out and back; round-trip loop generation is not included.
 
